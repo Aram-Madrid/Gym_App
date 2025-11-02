@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_crear_cuenta"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_marginTop="25dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/iniciar_sesion"
+        android:text="@string/crear_cuenta"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:layout_marginBottom="25dp"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/edit_text_email"
+        android:hint="@string/email"
+        android:textColor="@color/black"
+        android:textColorHint="#DB2187"
+        android:background="#DBDBDB"
+        android:padding="5dp"
+        android:layout_marginBottom="15dp"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/edit_text_pwd"
+        android:hint="@string/password"
+        android:textColor="@color/black"
+        android:textColorHint="@color/hint_color"
+        android:background="@color/edit_background"
+        android:padding="5dp"
+        android:layout_marginBottom="15dp"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/nombre_usuario"
+        android:hint="@string/nombre_de_usuario"
+        android:textColor="@color/black"
+        android:textColorHint="@color/hint_color"
+        android:background="@color/edit_background"
+        android:padding="5dp"
+        android:layout_marginBottom="15dp"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/altura_usuario"
+        android:hint="@string/altura_en_cm"
+        android:textColor="@color/black"
+        android:textColorHint="@color/hint_color"
+        android:background="@color/edit_background"
+        android:padding="5dp"
+        android:layout_marginBottom="15dp"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/peso"
+        android:hint="@string/peso_kg"
+        android:textColor="@color/black"
+        android:textColorHint="@color/hint_color"
+        android:background="@color/edit_background"
+        android:padding="5dp"
+        android:layout_marginBottom="15dp"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_crear_cuenta"
+        android:backgroundTint="@color/hint_color"
+        android:layout_gravity="center"
+        android:text="@string/crear_cuenta"
+        android:textSize="25sp"
+        android:layout_marginBottom="15dp"
+        />
+</LinearLayout>

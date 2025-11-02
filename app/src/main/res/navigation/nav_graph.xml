@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginActivity">
+
+    <activity
+        android:id="@+id/loginActivity"
+        android:name="com.example.ut2_app.LoginActivity"
+        android:label="LoginActivity" />
+    <activity
+        android:id="@+id/crearCuentaActivity"
+        android:name="com.example.ut2_app.CrearCuentaActivity"
+        android:label="CrearCuentaActivity" />
+</navigation>

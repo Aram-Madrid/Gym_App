@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">UT2_App</string>
+    <string name="iniciar_sesion">Iniciar Sesion</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="crear_cuenta">Crear Cuenta</string>
+    <string name="nombre_de_usuario">Nombre de Usuario</string>
+    <string name="altura_en_cm">Altura en cm</string>
+    <string name="peso_kg">Peso(kg)</string>
+    <string name="ranking">Ranking</string>
+    <string name="home">Home</string>
+    <string name="mi_rutina">Mi Rutina</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
