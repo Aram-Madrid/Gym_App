@@ -18,4 +18,5 @@
     <string name="escriba_aqu">Escriba aquí</string>
     <string name="cambiar_nombre">Cambiar nombre</string>
     <string name="configuraci_n">Configuración</string>
+    <string name="cerrar_sesion">Cerrar Sesion</string>
 </resources>

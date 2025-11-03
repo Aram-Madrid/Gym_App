@@ -1,6 +1,7 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -27,14 +28,14 @@ android {
         }
     }
 
-    buildFeatures{
+    buildFeatures {
         //compose = true
         viewBinding = true
     }
-//
-//    composeOptions{
-//        kotlinCompilerExtensionVersion = "1.5.3"
-//    }
+
+    //    composeOptions{
+    //        kotlinCompilerExtensionVersion = "1.5.3"
+    //    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -46,6 +47,9 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.4")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.4")
     implementation("androidx.activity:activity-compose:1.9.2")
@@ -58,11 +62,11 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
-
 //Descargar dependencias necesarias para el grafico
 //https://github.com/KoalaPlot/koalaplot-core
 //Abrir una terminal dentro de esa carpeta
