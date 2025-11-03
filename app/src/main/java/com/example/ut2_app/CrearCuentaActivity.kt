@@ -29,7 +29,7 @@ class CrearCuentaActivity : AppCompatActivity() {
             val altura = binding.alturaUsuario.text.toString().trim()
             val peso = binding.peso.text.toString().trim()
 
-            //VAlidacion muy basica
+            //Validacion muy basica
             //ToDo mejorar esto
             if (email.isEmpty() || password.isEmpty() || nombre.isEmpty() || altura.isEmpty() || peso.isEmpty()) {
                 Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
@@ -41,7 +41,7 @@ class CrearCuentaActivity : AppCompatActivity() {
                 .addOnSuccessListener { result ->
                     val userId = result.user?.uid ?: return@addOnSuccessListener
 
-                    // Datos "Default" para el furturo
+                    // Datos "Default" para el futuro
                     val datosUsuario = hashMapOf(
                         "nombre" to nombre,
                         "email" to email,
@@ -51,6 +51,8 @@ class CrearCuentaActivity : AppCompatActivity() {
                         "rango" to "Bronze",
                         "fotoPerfilUrl" to ""
                     )
+
+                    
 
                     db.collection("usuarios").document(userId).set(datosUsuario)
                         .addOnSuccessListener {
