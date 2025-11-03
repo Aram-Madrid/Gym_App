@@ -6,6 +6,10 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.ut2_app.databinding.ActivityConfiguracionBinding
+import com.google.firebase.auth.FirebaseAuth
+import android.content.Intent
+import android.widget.Toast
+import android.content.Context
 
 class ConfiguracionActivity : AppCompatActivity() {
 
@@ -17,39 +21,66 @@ class ConfiguracionActivity : AppCompatActivity() {
         binding = ActivityConfiguracionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Fondo animado (transición claro <-> oscuro)
+        val sharedPref = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        modoOscuro = sharedPref.getBoolean("modoOscuro", false)
+
+        // 🟩 Solo cargamos el tema actual, sin reiniciar ni animar
+        if (modoOscuro) {
+            binding.bolaSwitch.translationX = binding.fondoSwitch.width - binding.bolaSwitch.width - 8f
+        }
+
         val fondoAnimado = binding.fondoSwitch.background as TransitionDrawable
 
+        // 🟩 El click solo actualiza la variable y la animación, no el tema real
         binding.fondoSwitch.setOnClickListener {
             val bola = binding.bolaSwitch
             val moverA: Float
 
             if (!modoOscuro) {
-                // Mover bolita a la derecha
                 moverA = binding.fondoSwitch.width - bola.width - 8f
                 ObjectAnimator.ofFloat(bola, "translationX", moverA).apply {
                     duration = 300
                     start()
                 }
-
-                // Animar fondo y cambiar tema
                 fondoAnimado.startTransition(300)
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             } else {
-                // Mover bolita a la izquierda
                 moverA = 0f
                 ObjectAnimator.ofFloat(bola, "translationX", moverA).apply {
                     duration = 300
                     start()
                 }
-
-                // Volver fondo y tema claro
                 fondoAnimado.reverseTransition(300)
+            }
+
+            modoOscuro = !modoOscuro
+        }
+
+        // 🟩 Confirmar cambios -> guardar preferencia y aplicar tema realmente
+        binding.btnConfirmar.setOnClickListener {
+            sharedPref.edit().putBoolean("modoOscuro", modoOscuro).apply()
+
+            // Aplicar tema ahora (esto sí reinicia)
+            if (modoOscuro) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
 
-            // Cambiar estado
-            modoOscuro = !modoOscuro
+            Toast.makeText(this, "Cambios aplicados", Toast.LENGTH_SHORT).show()
+
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        binding.btnCerrarSesion.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            Toast.makeText(this, "Sesión cerrada correctamente", Toast.LENGTH_SHORT).show()
+
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
         }
     }
 }
