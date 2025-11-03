@@ -1,43 +1,73 @@
 package com.example.ut2_app
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.ut2_app.databinding.ActivityCrearCuentaBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class CrearCuentaActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCrearCuentaBinding
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
         binding = ActivityCrearCuentaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.buttonCrearCuenta.setOnClickListener {
-            val email = binding.editTextEmail.text.toString()
-            val password = binding.editTextPwd.text.toString()
-            val nombre = binding.nombreUsuario.text.toString()
-            val altura = binding.alturaUsuario.text.toString()
-            val peso = binding.peso.text.toString()
+        //autenticacion y guardar datos
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
+        binding.buttonCrearCuenta.setOnClickListener {
+            val email = binding.editTextEmail.text.toString().trim()
+            val password = binding.editTextPwd.text.toString().trim()
+            val nombre = binding.nombreUsuario.text.toString().trim()
+            val altura = binding.alturaUsuario.text.toString().trim()
+            val peso = binding.peso.text.toString().trim()
+
+            //VAlidacion muy basica
+            //ToDo mejorar esto
             if (email.isEmpty() || password.isEmpty() || nombre.isEmpty() || altura.isEmpty() || peso.isEmpty()) {
                 Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Cuenta creada correctamente", Toast.LENGTH_SHORT).show()
-                finish()
+                return@setOnClickListener
             }
 
+            // Crear usuario en firebase
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener { result ->
+                    val userId = result.user?.uid ?: return@addOnSuccessListener
 
+                    // Datos "Default" para el furturo
+                    val datosUsuario = hashMapOf(
+                        "nombre" to nombre,
+                        "email" to email,
+                        "altura" to altura,
+                        "peso" to peso,
+                        "elo" to 0,
+                        "rango" to "Bronze",
+                        "fotoPerfilUrl" to ""
+                    )
+
+                    db.collection("usuarios").document(userId).set(datosUsuario)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Cuenta creada correctamente<", Toast.LENGTH_SHORT).show()
+
+                            // Ir a mainActivity
+                            val intent = Intent(this, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Error al guardar los datos: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Error al crear la cuenta: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
         }
-
-
-
-
-
     }
 }
