@@ -1,15 +1,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    android:gravity="top"
+    android:layout_gravity="top"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_height="wrap_content"
+    <ImageButton
         android:layout_width="wrap_content"
-        android:id="@+id/textViewRanking"
-        android:text="Ranking coming soon"
-        android:textSize="25sp"
-        android:textStyle="bold" />
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_agregar_amigo"
+        android:src="@drawable/person_icon"
+        android:layout_gravity="right"
+        android:layout_marginTop="35dp"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="10dp"
+        />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/emblema_ranking"
+        android:src="@drawable/place_holder"
+        android:layout_marginBottom="35dp"
+        />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/listaRanking"
+        android:divider="@color/black"
+        android:dividerHeight="1dp"
+        />
 </LinearLayout>
