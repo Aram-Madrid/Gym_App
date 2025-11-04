@@ -19,4 +19,5 @@
     <string name="cambiar_nombre">Cambiar nombre</string>
     <string name="configuraci_n">Configuración</string>
     <string name="cerrar_sesion">Cerrar Sesion</string>
+    <string name="ranking_n_1">Ranking: nº 1</string>
 </resources>
