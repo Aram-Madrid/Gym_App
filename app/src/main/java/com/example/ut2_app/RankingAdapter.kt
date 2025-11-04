@@ -54,6 +54,7 @@ class RankingAdapter(private val context: Context, private val usuarios: List<Us
             view.setBackgroundColor(context.getColor(android.R.color.transparent))
         }
 
+
         return view
     }
 }

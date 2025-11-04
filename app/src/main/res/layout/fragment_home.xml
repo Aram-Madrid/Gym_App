@@ -1,24 +1,65 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <ImageButton
-        android:id="@+id/boton_configuracion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
+        android:id="@+id/boton_configuracion"
         android:src="@drawable/settings_icon"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
+        android:layout_gravity="right"
         android:layout_marginTop="35dp"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="10dp"
+        />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/nombre_de_usuario"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        >
+
+    </TextView>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/emblema_ranking"
+        android:src="@drawable/place_holder"
+        android:layout_marginBottom="35dp"
+        android:layout_marginTop="20dp"
         />
 
     <TextView
-        android:id="@+id/textViewHome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/ranking_n_1"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        />
+
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Home Coming Soon"
-        android:textSize="25sp"
-        android:textStyle="bold"
-        android:layout_centerInParent="true"/>
-</RelativeLayout>
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/grafica_ranking"
+        android:src="@drawable/place_holder"
+        android:layout_marginBottom="35dp"
+        android:layout_marginTop="20dp"
+        />
+
+</LinearLayout>
