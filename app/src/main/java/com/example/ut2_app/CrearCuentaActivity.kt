@@ -29,8 +29,6 @@ class CrearCuentaActivity : AppCompatActivity() {
             val altura = binding.alturaUsuario.text.toString().trim()
             val peso = binding.peso.text.toString().trim()
 
-            //Validacion muy basica
-            //ToDo mejorar esto
             if (email.isEmpty() || password.isEmpty() || nombre.isEmpty() || altura.isEmpty() || peso.isEmpty()) {
                 Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -56,7 +54,20 @@ class CrearCuentaActivity : AppCompatActivity() {
 
                     db.collection("usuarios").document(userId).set(datosUsuario)
                         .addOnSuccessListener {
-                            Toast.makeText(this, "Cuenta creada correctamente<", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Cuenta creada correctamente", Toast.LENGTH_SHORT).show()
+
+                            // coleccion vacia de amigos
+                            val amigosRef = db.collection("usuarios")
+                                .document(userId)
+                                .collection("amigos")
+
+                            amigosRef.add(hashMapOf("placeholder" to true))
+                                .addOnSuccessListener { doc ->
+                                    doc.delete() // elimina el placeholder
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(this, "Error creando subcolección amigos: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
 
                             // Ir a mainActivity
                             val intent = Intent(this, MainActivity::class.java)
