@@ -50,6 +50,8 @@ class CrearCuentaActivity : AppCompatActivity() {
                         "fotoPerfilUrl" to ""
                     )
 
+                    
+
                     db.collection("usuarios").document(userId).set(datosUsuario)
                         .addOnSuccessListener {
                             Toast.makeText(this, "Cuenta creada correctamente", Toast.LENGTH_SHORT).show()

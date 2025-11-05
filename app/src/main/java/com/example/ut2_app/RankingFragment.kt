@@ -30,6 +30,8 @@ class RankingFragment : Fragment() {
             val builder = AlertDialog.Builder(requireContext())
             builder.setTitle("Agregar amigo")
 
+
+
             val input = EditText(requireContext())
             input.hint = "Correo del amigo"
             builder.setView(input)
