@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ut2_app.databinding.FragmentRankingBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
@@ -27,62 +28,41 @@ class RankingFragment : Fragment() {
         _binding = FragmentRankingBinding.inflate(inflater, container, false)
 
         binding.btnAgregarAmigo.setOnClickListener {
-            val builder = AlertDialog.Builder(requireContext())
-            builder.setTitle("Agregar amigo")
-
-
-
-            val input = EditText(requireContext())
-            input.hint = "Correo del amigo"
-            builder.setView(input)
-
-            builder.setPositiveButton("Agregar") { dialog, _ ->
-                val texto = input.text.toString().trim()
-                if (texto.isNotEmpty()) {
-                    agregarAmigo(texto)
-                } else {
-                    Toast.makeText(requireContext(), "Introduce un correo", Toast.LENGTH_SHORT).show()
-                }
-                dialog.dismiss()
-            }
-
-            builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-            builder.show()
+            mostrarDialogoAgregarAmigo()
         }
 
+        // RecyclerView
+        binding.recyclerRanking.layoutManager = LinearLayoutManager(requireContext())
+
         cargarRankingAmigos()
+
         return binding.root
     }
 
     private fun cargarRankingAmigos() {
         val uidActual = FirebaseAuth.getInstance().currentUser?.uid
-        val usuarios = mutableListOf<Usuario>()
-        val adapter = RankingAdapter(requireContext(), usuarios)
-        binding.listaRanking.adapter = adapter
-
         if (uidActual == null) {
             Toast.makeText(requireContext(), "Error: usuario no autenticado", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Primero obtenemos los amigos
+        val usuarios = mutableListOf<Usuario>()
+        val adapter = RankingAdapter(requireContext(), usuarios)
+        binding.recyclerRanking.adapter = adapter
+
         db.collection("usuarios").document(uidActual)
             .collection("amigos")
             .get()
             .addOnSuccessListener { amigosDocs ->
                 usuarios.clear()
                 val friendIds = amigosDocs.mapNotNull { it.getString("amigoId") }.toMutableList()
-
-                // Incluimos al propio usuario
-                friendIds.add(uidActual)
+                friendIds.add(uidActual) // incluir al usuario actual
 
                 if (friendIds.isEmpty()) {
-                    Toast.makeText(requireContext(), "Aún no tienes amigos añadidos", Toast.LENGTH_SHORT).show()
                     adapter.notifyDataSetChanged()
                     return@addOnSuccessListener
                 }
 
-                // Cargar todos los usuarios (amigos + yo)
                 db.collection("usuarios")
                     .whereIn(FieldPath.documentId(), friendIds)
                     .get()
@@ -96,21 +76,34 @@ class RankingFragment : Fragment() {
                             usuarios.add(Usuario(nombre, puntuacion, fotoUrl, 0, esActual))
                         }
 
-                        // Ordenar por puntuación y asignar posiciones
                         usuarios.sortByDescending { it.puntuacion }
-                        usuarios.forEachIndexed { index, usuario ->
-                            usuario.posicion = index + 1
-                        }
+                        usuarios.forEachIndexed { index, usuario -> usuario.posicion = index + 1 }
 
                         adapter.notifyDataSetChanged()
                     }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(requireContext(), "Error al cargar ranking: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Error al cargar amigos: ${e.message}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun mostrarDialogoAgregarAmigo() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Agregar amigo")
+
+        val input = EditText(requireContext())
+        input.hint = "Correo del amigo"
+        builder.setView(input)
+
+        builder.setPositiveButton("Agregar") { dialog, _ ->
+            val texto = input.text.toString().trim()
+            if (texto.isNotEmpty()) {
+                agregarAmigo(texto)
+            } else {
+                Toast.makeText(requireContext(), "Introduce un correo", Toast.LENGTH_SHORT).show()
             }
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+        builder.show()
     }
 
     private fun agregarAmigo(emailAmigo: String) {
@@ -147,12 +140,6 @@ class RankingFragment : Fragment() {
                         Toast.makeText(requireContext(), "$amigoNombre añadido a tus amigos", Toast.LENGTH_SHORT).show()
                         cargarRankingAmigos()
                     }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(requireContext(), "Error al agregar amigo: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Error al buscar usuario: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -161,3 +148,4 @@ class RankingFragment : Fragment() {
         _binding = null
     }
 }
+
