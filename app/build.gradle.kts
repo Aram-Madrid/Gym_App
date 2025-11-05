@@ -62,7 +62,7 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.0")
 
     // KoalaPlot
-    implementation("io.github.koalaplot:koalaplot-core:0.6.0")
+    implementation("io.github.koalaplot:koalaplot-core:0.6.2")
 
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
