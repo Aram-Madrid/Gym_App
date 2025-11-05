@@ -1,60 +1,64 @@
 package com.example.ut2_app
 
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
 data class Usuario(
     val nombre: String,
     val puntuacion: Int,
-    val fotoUrl: String?,
-    var posicion: Int,
+    val fotoUrl: String? = null,
+    var posicion: Int = 0,
     val esActual: Boolean = false
 )
 
-class RankingAdapter(private val context: Context, private val usuarios: List<Usuario>) : BaseAdapter() {
+class RankingAdapter(
+    private val context: Context,
+    private val usuarios: List<Usuario>
+) : RecyclerView.Adapter<RankingAdapter.UsuarioViewHolder>() {
 
-    override fun getCount(): Int = usuarios.size
+    // ViewHolder
+    class UsuarioViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val txtPosicion: TextView = view.findViewById(R.id.posicion)
+        val txtNombre: TextView = view.findViewById(R.id.nombre)
+        val txtPuntuacion: TextView = view.findViewById(R.id.puntuacion)
+        val imgFoto: ImageView = view.findViewById(R.id.foto)
+    }
 
-    override fun getItem(position: Int): Any = usuarios[position]
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UsuarioViewHolder {
+        val view = LayoutInflater.from(context).inflate(R.layout.item_ranking, parent, false)
+        return UsuarioViewHolder(view)
+    }
 
-    override fun getItemId(position: Int): Long = position.toLong()
+    override fun getItemCount(): Int = usuarios.size
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.item_ranking, parent, false)
-
+    override fun onBindViewHolder(holder: UsuarioViewHolder, position: Int) {
         val usuario = usuarios[position]
-        val txtPosicion = view.findViewById<TextView>(R.id.posicion)
-        val txtNombre = view.findViewById<TextView>(R.id.nombre)
-        val txtPuntuacion = view.findViewById<TextView>(R.id.puntuacion)
-        val imgFoto = view.findViewById<ImageView>(R.id.foto)
 
-        txtPosicion.text = usuario.posicion.toString()
-        txtNombre.text = usuario.nombre
-        txtPuntuacion.text = "${usuario.puntuacion} pts"
+        holder.txtPosicion.text = usuario.posicion.toString()
+        holder.txtNombre.text = usuario.nombre
+        holder.txtPuntuacion.text = "${usuario.puntuacion} pts"
 
-        // Carga la imagen (si existe) o un placeholder
+        // Carga la foto
         if (!usuario.fotoUrl.isNullOrEmpty()) {
             Glide.with(context)
                 .load(usuario.fotoUrl)
                 .placeholder(R.drawable.place_holder)
-                .into(imgFoto)
+                .into(holder.imgFoto)
         } else {
-            imgFoto.setImageResource(R.drawable.place_holder)
+            holder.imgFoto.setImageResource(R.drawable.place_holder)
         }
 
-        if (usuario.esActual){
-            view.setBackgroundColor(context.getColor(R.color.hint_color))
-        } else {
-            view.setBackgroundColor(context.getColor(android.R.color.transparent))
-        }
-
-
-        return view
+        // Resaltar usuario actual
+        holder.itemView.setBackgroundColor(
+            if (usuario.esActual) context.getColor(R.color.hint_color)
+            else Color.TRANSPARENT
+        )
     }
 }
