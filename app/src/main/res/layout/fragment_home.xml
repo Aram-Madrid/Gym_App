@@ -3,6 +3,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+
+
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,15 +35,30 @@
 
     </TextView>
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <FrameLayout
+        android:layout_width="130dp"
+        android:layout_height="130dp"
         android:layout_gravity="center_horizontal"
-        android:id="@+id/emblema_ranking"
-        android:src="@drawable/place_holder"
-        android:layout_marginBottom="35dp"
         android:layout_marginTop="20dp"
-        />
+        android:layout_marginBottom="35dp"
+        android:background="@drawable/circle_shape_bronce">
+
+        <ImageView
+            android:id="@+id/emblema_ranking"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:src="@drawable/place_holder"
+            android:background="@drawable/circle_clip"
+            android:clipToOutline="true"
+            android:layout_margin="3dp" />
+    </FrameLayout>
+
+
+
+
+
 
     <TextView
         android:layout_width="match_parent"
@@ -52,14 +69,8 @@
         android:textStyle="bold"
         />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/grafica_ranking"
-        android:src="@drawable/place_holder"
-        android:layout_marginBottom="35dp"
-        android:layout_marginTop="20dp"
-        />
-
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/composeView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </LinearLayout>
