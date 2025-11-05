@@ -23,9 +23,6 @@ import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.generateHueColorPalette
 import kotlin.random.Random
 
-// ----------------------------------------------------
-// Fragmento principal que contiene el gráfico y la UI
-// ----------------------------------------------------
 class HomeFragment : Fragment() {
 
     // con ViewBinding hago referencia al archivo XML fragment_home.xml

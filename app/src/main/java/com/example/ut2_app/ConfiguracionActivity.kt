@@ -24,14 +24,12 @@ class ConfiguracionActivity : AppCompatActivity() {
         val sharedPref = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
         modoOscuro = sharedPref.getBoolean("modoOscuro", false)
 
-        // 🟩 Solo cargamos el tema actual, sin reiniciar ni animar
         if (modoOscuro) {
             binding.bolaSwitch.translationX = binding.fondoSwitch.width - binding.bolaSwitch.width - 8f
         }
 
         val fondoAnimado = binding.fondoSwitch.background as TransitionDrawable
 
-        // 🟩 El click solo actualiza la variable y la animación, no el tema real
         binding.fondoSwitch.setOnClickListener {
             val bola = binding.bolaSwitch
             val moverA: Float
@@ -55,11 +53,10 @@ class ConfiguracionActivity : AppCompatActivity() {
             modoOscuro = !modoOscuro
         }
 
-        // 🟩 Confirmar cambios -> guardar preferencia y aplicar tema realmente
         binding.btnConfirmar.setOnClickListener {
             sharedPref.edit().putBoolean("modoOscuro", modoOscuro).apply()
 
-            // Aplicar tema ahora (esto sí reinicia)
+            // Aplicar tema ahora
             if (modoOscuro) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             } else {
