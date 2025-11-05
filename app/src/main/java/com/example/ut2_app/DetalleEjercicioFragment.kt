@@ -67,6 +67,7 @@ class DetalleEjercicioFragment : Fragment() {
         binding.linearLayoutSeries.removeAllViews()
         seriesViews.clear()
 
+
         for (i in 1..numSeries) {
             val tv = TextView(requireContext())
             tv.text = "Serie $i"

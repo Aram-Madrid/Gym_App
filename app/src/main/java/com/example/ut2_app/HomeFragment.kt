@@ -79,7 +79,7 @@ fun GraficoRadar() {
         seriesNames.forEach {
             add(
                 categories.map { category ->
-                    DefaultPolarPoint(Random.nextDouble(1.0, 5.0).toFloat(), category)
+                    DefaultPolarPoint(Random.nextDouble(1.0, 4.0).toFloat(), category)
                 }
             )
         }
@@ -87,12 +87,11 @@ fun GraficoRadar() {
 
     // Este mapa sirve para convertir los valores numéricos del eje radial en letras
     val niveles = mapOf(
-        0 to "E",
-        1 to "D",
-        2 to "C",
-        3 to "B",
-        4 to "A",
-        5 to "S"
+        0 to "F",
+        1 to "C",
+        2 to "B",
+        3 to "A",
+        4 to "S"
     )
 
 
@@ -119,7 +118,7 @@ fun GraficoRadar() {
         // ----------------------------------------------------
         PolarGraph(
             // Eje radial: valores de 0 a 5
-            rememberFloatRadialAxisModel((0..5).map { it.toFloat() }),
+            rememberFloatRadialAxisModel((0..4).map { it.toFloat() }),
 
             // Eje angular: las categorías que he definido antes
             rememberCategoryAngularAxisModel(categories),
@@ -136,10 +135,10 @@ fun GraficoRadar() {
                 radialGridType = RadialGridType.CIRCLES,
 
                 // Estilo de las líneas del eje angular
-                angularAxisGridLineStyle = LineStyle(SolidColor(Color.Gray), 2.dp, alpha = 0.4f),
+                angularAxisGridLineStyle = LineStyle(SolidColor(Color.Black), 2.dp, alpha = 0.4f),
 
                 // Estilo de las líneas del eje radial
-                radialAxisGridLineStyle = LineStyle(SolidColor(Color.Gray), 2.dp, alpha = 0.4f)
+                radialAxisGridLineStyle = LineStyle(SolidColor(Color.Black), 2.dp, alpha = 0.3f)
             )
         ) {
 

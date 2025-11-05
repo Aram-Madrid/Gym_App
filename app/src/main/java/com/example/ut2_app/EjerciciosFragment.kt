@@ -38,6 +38,8 @@ class EjerciciosFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+
         adapter = EjercicioAdapter(ejerciciosSeleccionados) { ejercicio ->
             // Abrir DetalleEjercicioFragment pasando el ejercicio
             parentFragmentManager.beginTransaction()
