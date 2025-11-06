@@ -12,7 +12,7 @@
     <!-- Título de la rutina -->
     <TextView
         android:id="@+id/textViewTitulo"
-        android:text="@string/rutina_del_d_a"
+        android:text="Rutina del día"
         android:textSize="26sp"
         android:textStyle="bold"
         android:textColor="#212121"
@@ -39,18 +39,10 @@
     </androidx.cardview.widget.CardView>
 
     <!-- Botón de agregar ejercicio -->
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btnAgregarEjercicio"
-        style="?attr/materialButtonOutlinedStyle"
-        android:text="@string/agregar_ejercicio"
-        android:textAllCaps="false"
-        android:textSize="18sp"
-        android:fontFamily="sans-serif-medium"
-        android:padding="12dp"
-        android:backgroundTint="#6200EE"
-        android:textColor="#FFFFFF"
-        app:cornerRadius="50dp"
-        android:elevation="4dp"
+        style="@style/EstiloBoton"
+        android:text="+ Agregar ejercicio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

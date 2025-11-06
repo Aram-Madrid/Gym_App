@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    style="@style/Base.Theme.UT2_App"
+    >
 
     <!-- Contenedor donde se cargan los fragmentos -->
     <androidx.fragment.app.FragmentContainerView
@@ -22,6 +24,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:menu="@menu/bottom_nav_menu"
-        android:background="?android:attr/windowBackground"
+        android:background="?android:attr/colorPrimary"
         />
 </LinearLayout>

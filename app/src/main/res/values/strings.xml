@@ -11,7 +11,6 @@
     <string name="home">Home</string>
     <string name="mi_rutina">Mi Rutina</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="confirmar">Confirmar</string>
     <string name="cambiar_foto">Cambiar Foto</string>
     <string name="tema">Tema</string>
@@ -29,7 +28,7 @@
     <string name="guardar_series">Guardar series</string>
     <string name="selecciona_ejercicios">Selecciona ejercicios</string>
     <string name="plus">+</string>
-    <string name="nombre_del_jugador">Nombre del jugador</string>
+    <string name="nombre_del_usuario">Nombre del usuario</string>
     <string name="_1200_puntos">1200 puntos</string>
     <string name="serie_1">Serie 1</string>
     <string name="peso">Peso</string>
