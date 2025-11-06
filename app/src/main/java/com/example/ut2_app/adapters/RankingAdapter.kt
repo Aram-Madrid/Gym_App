@@ -1,4 +1,4 @@
-package com.example.ut2_app.fragments
+package com.example.ut2_app.adapters
 
 import android.content.Context
 import android.graphics.Color

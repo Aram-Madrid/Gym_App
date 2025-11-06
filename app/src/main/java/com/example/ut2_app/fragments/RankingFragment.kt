@@ -1,5 +1,6 @@
 package com.example.ut2_app.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.ut2_app.adapters.RankingAdapter
+import com.example.ut2_app.adapters.Usuario
 import com.example.ut2_app.databinding.FragmentRankingBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
@@ -39,6 +42,7 @@ class RankingFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun cargarRankingAmigos() {
         val uidActual = FirebaseAuth.getInstance().currentUser?.uid
         if (uidActual == null) {
