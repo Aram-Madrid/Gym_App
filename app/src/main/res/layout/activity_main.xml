@@ -7,7 +7,7 @@
     style="@style/Base.Theme.UT2_App"
     >
 
-    <!-- Contenedor donde se cargarán los fragmentos -->
+    <!-- Contenedor donde se cargan los fragmentos -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container"
         android:name="androidx.navigation.fragment.NavHostFragment"
