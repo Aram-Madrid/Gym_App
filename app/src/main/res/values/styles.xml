@@ -1,0 +1,45 @@
+<resources>
+    <style name="EstiloBoton" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_marginBottom">16dp</item>
+        <item name="android:backgroundTint">?android:attr/colorPrimary</item>
+    </style>
+
+    <style name="EstiloEditText" parent="Widget.AppCompat.EditText">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColorHint">?android:attr/colorPrimary</item>
+        <item name="android:padding">10dp</item>
+    </style>
+
+    <style name="EstiloEditTextConfiguracion" parent="Widget.AppCompat.EditText">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColorHint">?android:attr/colorPrimary</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="TituloPrincipal">
+        <item name="android:textSize">25sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:gravity">left</item>
+    </style>
+
+    <style name="TituloConfiguracion">
+        <item name="android:textSize">25sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="SubTexto">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:gravity">left</item>
+    </style>
+
+
+</resources>
