@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_ranking"
+        android:id="@+id/rankingFragment"
         android:title="@string/ranking"
         android:icon="@drawable/trophy_icon" />
 
     <item
-        android:id="@+id/nav_home"
+        android:id="@+id/homeFragment2"
         android:title="@string/home"
         android:icon="@drawable/home_icon"
         />
 
     <item
-        android:id="@+id/nav_mi_rutina"
+        android:id="@+id/miRutinaFragment"
         android:title="@string/mi_rutina"
         android:icon="@drawable/exercise_icon" />
 </menu>

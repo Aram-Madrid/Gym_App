@@ -53,8 +53,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
-    implementation("androidx.navigation:navigation-fragment-ktx:2.8.4")
-    implementation("androidx.navigation:navigation-ui-ktx:2.8.4")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.6")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.6")
 
     // Compose
     implementation("androidx.activity:activity-compose:1.9.2")
@@ -62,7 +62,7 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.0")
 
     // KoalaPlot
-    implementation("io.github.koalaplot:koalaplot-core:0.6.0")
+    implementation("io.github.koalaplot:koalaplot-core:0.6.2")
 
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
