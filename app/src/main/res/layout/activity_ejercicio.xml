@@ -12,7 +12,7 @@
     <!-- Título de la rutina -->
     <TextView
         android:id="@+id/textViewTitulo"
-        android:text="Rutina del día"
+        android:text="@string/rutina_del_d_a"
         android:textSize="26sp"
         android:textStyle="bold"
         android:textColor="#212121"
@@ -42,7 +42,7 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAgregarEjercicio"
         style="?attr/materialButtonOutlinedStyle"
-        android:text="+ Agregar ejercicio"
+        android:text="@string/agregar_ejercicio"
         android:textAllCaps="false"
         android:textSize="18sp"
         android:fontFamily="sans-serif-medium"

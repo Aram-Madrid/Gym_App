@@ -34,4 +34,13 @@
     <string name="serie_1">Serie 1</string>
     <string name="peso">Peso</string>
     <string name="repeticiones">Repeticiones</string>
+    <string name="series">Series</string>
+    <string name="selecciona_ejercicio">Selecciona ejercicio</string>
+    <string name="rutina_del_d_a">Rutina del día</string>
+    <string name="agregar_ejercicio">+ Agregar ejercicio</string>
+    <string name="series_del_ejercicio">Series del ejercicio</string>
+    <string name="mostrando_series">mostrando series</string>
+    <string name="volver">Volver</string>
+    <string name="nombre_del_ejercicio">Nombre del ejercicio</string>
+    <string name="sin_series_registradas">Sin series registradas</string>
 </resources>
