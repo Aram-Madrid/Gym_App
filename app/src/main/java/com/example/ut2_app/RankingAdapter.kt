@@ -2,6 +2,7 @@ package com.example.ut2_app
 
 import android.content.Context
 import android.graphics.Color
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -56,9 +57,14 @@ class RankingAdapter(
         }
 
         // Resaltar usuario actual
+        val typedValue = TypedValue()
+        context.theme.resolveAttribute(android.R.attr.colorAccent, typedValue, true)
+        val colorAcento = typedValue.data
+
         holder.itemView.setBackgroundColor(
-            if (usuario.esActual) context.getColor(R.color.hint_color)
+            if (usuario.esActual) colorAcento
             else Color.TRANSPARENT
         )
+
     }
 }
