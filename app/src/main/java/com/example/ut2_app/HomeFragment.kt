@@ -23,6 +23,10 @@ import io.github.koalaplot.core.style.*
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.generateHueColorPalette
 import kotlin.random.Random
+import android.util.TypedValue
+import androidx.compose.ui.platform.LocalContext
+import io.github.koalaplot.core.style.AreaStyle
+
 
 class HomeFragment : Fragment() {
 
@@ -69,6 +73,16 @@ class HomeFragment : Fragment() {
 @Composable
 fun GraficoRadar() {
 
+    val contextFondo = LocalContext.current
+    val typedValue = TypedValue()
+    contextFondo.theme.resolveAttribute(android.R.attr.colorAccent, typedValue, true)
+    val accentColor = Color(typedValue.data)
+
+
+
+
+
+
     // Listo las categorias del grafico
     val categories = listOf("Pecho", "Brazos", "Core", "Espalda", "Piernas")
 
@@ -77,7 +91,7 @@ fun GraficoRadar() {
 
     // Genero los datos aleatorios para cada categoría (1.0 a 5.0)
     val data: List<List<PolarPoint<Float, String>>> = buildList {
-        seriesNames.forEach {
+        seriesNames.forEach { _ ->
             add(
                 categories.map { category ->
                     DefaultPolarPoint(Random.nextDouble(1.0, 4.0).toFloat(), category)
@@ -139,7 +153,8 @@ fun GraficoRadar() {
                 angularAxisGridLineStyle = LineStyle(SolidColor(Color.Black), 2.dp, alpha = 0.4f),
 
                 // Estilo de las líneas del eje radial
-                radialAxisGridLineStyle = LineStyle(SolidColor(Color.Black), 2.dp, alpha = 0.3f)
+                radialAxisGridLineStyle = LineStyle(SolidColor(Color.Black), 2.dp, alpha = 0.3f),
+                background = AreaStyle(SolidColor(accentColor)) // cambio el fondo del grafico
             )
         ) {
 
