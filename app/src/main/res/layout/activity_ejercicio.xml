@@ -39,18 +39,10 @@
     </androidx.cardview.widget.CardView>
 
     <!-- Botón de agregar ejercicio -->
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btnAgregarEjercicio"
-        style="?attr/materialButtonOutlinedStyle"
+        style="@style/EstiloBoton"
         android:text="+ Agregar ejercicio"
-        android:textAllCaps="false"
-        android:textSize="18sp"
-        android:fontFamily="sans-serif-medium"
-        android:padding="12dp"
-        android:backgroundTint="#6200EE"
-        android:textColor="#FFFFFF"
-        app:cornerRadius="50dp"
-        android:elevation="4dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

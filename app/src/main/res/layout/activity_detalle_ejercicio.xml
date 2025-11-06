@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:background="#FAFAFA"
-    tools:context=".activities.DetalleEjercicioActivity">
+    style="@style/Base.Theme.UT2_App"
+    >
 
     <LinearLayout
         android:orientation="vertical"
@@ -17,16 +18,13 @@
         <!-- Título -->
         <TextView
             android:text="Selecciona ejercicio"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="#212121"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginBottom="12dp"
+            style="@style/TituloPrincipal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            />
 
         <!-- Spinner de ejercicios -->
-        <com.google.android.material.card.MaterialCardView
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -39,51 +37,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="12dp" />
-        </com.google.android.material.card.MaterialCardView>
+        </androidx.cardview.widget.CardView>
 
         <!-- Número de series -->
         <TextView
             android:text="Series"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#212121"
-            android:layout_marginBottom="4dp"
+            style="@style/SubTexto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <com.google.android.material.textfield.TextInputLayout
+        <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            app:boxBackgroundMode="outline"
-            app:boxStrokeColor="#6200EE"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusBottomEnd="12dp">
+            android:id="@+id/editTextNumSeries"
+        >
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/editTextNumSeries"
-                android:hint="Número de series"
-                android:inputType="number"
-                android:padding="12dp"
-                android:textColor="#212121"
-                android:textSize="16sp"
-                android:background="@null"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"/>
-        </com.google.android.material.textfield.TextInputLayout>
+<!--            <EditText-->
+<!--                android:id="@+id/editTextNumSeries"-->
+<!--                android:hint="Número de series"-->
+<!--                style="@style/EstiloEditText"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_width="match_parent"/>-->
+        </EditText>
 
         <!-- Botón establecer -->
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/btnEstablecerSeries"
             android:text="Establecer series"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            app:cornerRadius="50dp"
-            app:backgroundTint="#6200EE"
-            app:elevation="4dp"
-            android:layout_marginBottom="20dp"
+            style="@style/EstiloBoton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -96,17 +77,10 @@
             android:layout_marginBottom="24dp" />
 
         <!-- Botón confirmar -->
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/btnConfirmar"
             android:text="Confirmar"
-            android:textAllCaps="false"
-            android:textSize="18sp"
-            android:fontFamily="sans-serif-medium"
-            android:padding="12dp"
-            app:cornerRadius="50dp"
-            app:backgroundTint="#03DAC5"
-            android:textColor="#FFFFFF"
-            app:elevation="4dp"
+            style="@style/EstiloBoton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
