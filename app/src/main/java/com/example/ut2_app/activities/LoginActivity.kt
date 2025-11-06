@@ -1,10 +1,9 @@
-package com.example.ut2_app
+package com.example.ut2_app.activities
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.ut2_app.databinding.ActivityCrearCuentaBinding
 import com.example.ut2_app.databinding.ActivityLoginBinding
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth

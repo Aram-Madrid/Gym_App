@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import com.example.ut2_app.activities.ConfiguracionActivity
 import com.example.ut2_app.databinding.FragmentHomeBinding
 import io.github.koalaplot.core.ChartLayout
 
