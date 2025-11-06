@@ -1,4 +1,4 @@
-package com.example.ut2_app.fragments
+package com.example.ut2_app
 
 import android.content.Intent
 import android.os.Bundle

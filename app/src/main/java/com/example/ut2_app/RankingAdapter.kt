@@ -1,4 +1,4 @@
-package com.example.ut2_app.adapters
+package com.example.ut2_app
 
 import android.content.Context
 import android.graphics.Color
@@ -9,7 +9,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.ut2_app.R
 
 data class Usuario(
     val nombre: String,

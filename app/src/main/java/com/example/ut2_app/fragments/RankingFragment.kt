@@ -10,8 +10,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.ut2_app.adapters.RankingAdapter
-import com.example.ut2_app.adapters.Usuario
+import com.example.ut2_app.RankingAdapter
+import com.example.ut2_app.Usuario
 import com.example.ut2_app.databinding.FragmentRankingBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
