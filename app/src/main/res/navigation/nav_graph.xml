@@ -5,14 +5,14 @@
     app:startDestination="@id/homeFragment2">
     <fragment
         android:id="@+id/homeFragment2"
-        android:name="com.example.ut2_app.HomeFragment"
+        android:name="com.example.ut2_app.fragments.HomeFragment"
         android:label="HomeFragment" />
     <fragment
         android:id="@+id/rankingFragment"
-        android:name="com.example.ut2_app.RankingFragment"
+        android:name="com.example.ut2_app.fragments.RankingFragment"
         android:label="RankingFragment" />
     <fragment
         android:id="@+id/miRutinaFragment"
-        android:name="com.example.ut2_app.MiRutinaFragment"
+        android:name="com.example.ut2_app.fragments.MiRutinaFragment"
         android:label="MiRutinaFragment" />
 </navigation>

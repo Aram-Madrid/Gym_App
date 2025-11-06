@@ -1,4 +1,4 @@
-package com.example.ut2_app
+package com.example.ut2_app.activities
 
 import android.animation.ObjectAnimator
 import android.graphics.drawable.TransitionDrawable
@@ -9,7 +9,6 @@ import com.example.ut2_app.databinding.ActivityConfiguracionBinding
 import com.google.firebase.auth.FirebaseAuth
 import android.content.Intent
 import android.widget.Toast
-import android.content.Context
 
 class ConfiguracionActivity : AppCompatActivity() {
 
@@ -21,7 +20,7 @@ class ConfiguracionActivity : AppCompatActivity() {
         binding = ActivityConfiguracionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val sharedPref = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         modoOscuro = sharedPref.getBoolean("modoOscuro", false)
 
         if (modoOscuro) {
@@ -37,14 +36,14 @@ class ConfiguracionActivity : AppCompatActivity() {
             if (!modoOscuro) {
                 moverA = binding.fondoSwitch.width - bola.width - 8f
                 ObjectAnimator.ofFloat(bola, "translationX", moverA).apply {
-                    duration = 300
+                    ObjectAnimator.setFrameDelay(300)
                     start()
                 }
                 fondoAnimado.startTransition(300)
             } else {
                 moverA = 0f
                 ObjectAnimator.ofFloat(bola, "translationX", moverA).apply {
-                    duration = 300
+                    ObjectAnimator.setFrameDelay(300)
                     start()
                 }
                 fondoAnimado.reverseTransition(300)

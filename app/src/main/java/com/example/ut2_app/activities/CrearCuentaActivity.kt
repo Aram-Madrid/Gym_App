@@ -1,4 +1,4 @@
-package com.example.ut2_app
+package com.example.ut2_app.activities
 
 import android.content.Intent
 import android.os.Bundle
