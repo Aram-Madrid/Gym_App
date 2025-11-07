@@ -8,7 +8,8 @@
     card_view:cardBackgroundColor="#FFFFFF"
     android:foreground="?android:attr/selectableItemBackground"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    >
 
     <LinearLayout
         android:orientation="vertical"
@@ -21,21 +22,18 @@
             android:id="@+id/textViewNombreEjercicio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nombre del ejercicio"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#212121"
-            android:fontFamily="sans-serif-medium" />
+            android:text="@string/nombre_del_ejercicio"
+            style="@style/TituloPrincipalCardview"
+            android:fontFamily="sans-serif-medium"
+            />
 
         <!-- Resumen de series -->
         <TextView
             android:id="@+id/textViewResumenSeries"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sin series registradas"
-            android:textSize="15sp"
-            android:layout_marginTop="6dp"
-            android:textColor="#757575"
+            android:text="@string/sin_series_registradas"
+            style="@style/SubTextoCardview"
             android:fontFamily="sans-serif" />
 
     </LinearLayout>
