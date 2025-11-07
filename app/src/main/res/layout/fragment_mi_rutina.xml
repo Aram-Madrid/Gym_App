@@ -4,12 +4,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    android:paddingTop="40dp">
+    android:paddingTop="40dp"
+    style="@style/Base.Theme.UT2_App"
+    >
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewRutinas"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:paddingBottom="16dp" />
+        android:paddingBottom="16dp"
+        />
 </LinearLayout>
