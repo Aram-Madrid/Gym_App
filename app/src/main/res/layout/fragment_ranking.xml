@@ -3,18 +3,16 @@
     android:layout_height="match_parent"
     android:gravity="top"
     android:layout_gravity="top"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    style="@style/Base.Theme.UT2_App"
+    >
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btn_agregar_amigo"
         android:src="@drawable/person_icon"
-        android:layout_gravity="right"
-        android:layout_marginTop="35dp"
-        android:background="@android:color/transparent"
-        android:layout_marginBottom="10dp"
-        android:layout_marginRight="10dp"
+        style="@style/EstiloBotonImagen"
         />
 
     <ImageView
@@ -35,9 +33,10 @@
         android:layout_gravity="center"
         android:max="100"
         android:progress="75"
-        android:progressDrawable="@drawable/progress_bar_ranking"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="20dp"/>
+        android:layout_marginBottom="20dp"
+        android:progressDrawable="@drawable/progress_bar_ranking"
+        />
 
 
 
