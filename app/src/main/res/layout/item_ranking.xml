@@ -42,6 +42,6 @@
         android:layout_height="wrap_content"
         android:text="@string/_1200_puntos"
         android:textSize="14sp"
-        android:layout_marginLeft="35dp"
+        android:layout_marginStart="35dp"
         />
 </LinearLayout>

@@ -9,22 +9,19 @@
         android:id="@+id/textViewSerie"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:text="@string/serie_1"
-        android:layout_marginEnd="16dp"/>
+        />
 
     <EditText
         android:id="@+id/editTextPeso"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
+        style="@style/EstiloEditNumero"
         android:hint="@string/peso"
-        android:inputType="number"/>
+        />
 
     <EditText
         android:id="@+id/editTextRepeticiones"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
+        style="@style/EstiloEditNumero"
         android:hint="@string/repeticiones"
-        android:inputType="number"/>
+        />
 </LinearLayout>
