@@ -1,5 +1,6 @@
-package com.example.ut2_app
+package com.example.ut2_app.fragments
 
+import android.R
 import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
@@ -65,7 +66,7 @@ class HomeFragment : Fragment() {
 fun GraficoRadar() {
     val contextFondo = LocalContext.current
     val typedValue = TypedValue()
-    contextFondo.theme.resolveAttribute(android.R.attr.colorAccent, typedValue, true)
+    contextFondo.theme.resolveAttribute(R.attr.colorAccent, typedValue, true)
     val accentColor = Color(typedValue.data)
 
     val categories = listOf("Pecho", "Brazos", "Core", "Espalda", "Piernas")

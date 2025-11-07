@@ -28,7 +28,7 @@
         <item name="android:padding">@dimen/edit_padding</item>
     </style>
 
-    <!-- EditText mediano (solo 1 definición) -->
+    <!-- EditText mediano-->
     <style name="EstiloEditTextMediano" parent="Widget.AppCompat.EditText">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textColorHint">?android:attr/colorPrimary</item>

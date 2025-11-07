@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:text="@string/serie_1"
+        style="@style/SubTexto"
         />
 
     <EditText

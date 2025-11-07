@@ -5,8 +5,6 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="40dp"
     android:layout_marginVertical="10dp"
-    card_view:cardCornerRadius="16dp"
-    card_view:cardElevation="8dp"
     style="@style/EstiloCardView">
 
     <TextView

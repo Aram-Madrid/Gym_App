@@ -8,8 +8,9 @@
     >
 
     <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:scaleType="fitCenter"
         android:id="@+id/btn_agregar_amigo"
         android:src="@drawable/person_icon"
         style="@style/EstiloBotonImagen"
