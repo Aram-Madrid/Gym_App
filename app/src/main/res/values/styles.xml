@@ -1,18 +1,23 @@
 <resources>
+
+    <!-- Botones -->
     <style name="EstiloBoton" parent="Widget.AppCompat.Button">
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">@dimen/text_button_size</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:layout_marginTop">15dp</item>
+        <item name="android:layout_marginTop">@dimen/button_margin_top</item>
         <item name="android:backgroundTint">?android:attr/colorPrimary</item>
+        <item name="android:height">@dimen/button_height</item>
     </style>
 
+    <!-- EditText normal -->
     <style name="EstiloEditText" parent="Widget.AppCompat.EditText">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textColorHint">?android:attr/colorPrimary</item>
-        <item name="android:padding">10dp</item>
+        <item name="android:padding">@dimen/edit_padding</item>
     </style>
 
+    <!-- EditText numerico -->
     <style name="EstiloEditNumero" parent="Widget.AppCompat.EditText">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textColorHint">?android:attr/colorPrimary</item>
@@ -20,98 +25,104 @@
         <item name="android:layout_weight">1</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:inputType">number</item>
+        <item name="android:padding">@dimen/edit_padding</item>
     </style>
 
-
+    <!-- EditText mediano (solo 1 definición) -->
     <style name="EstiloEditTextMediano" parent="Widget.AppCompat.EditText">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textColorHint">?android:attr/colorPrimary</item>
-        <item name="android:padding">10dp</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:padding">@dimen/edit_padding</item>
+        <item name="android:textSize">@dimen/text_secondary_size</item>
     </style>
 
+    <!-- Titulos -->
     <style name="TituloPrincipal">
-        <item name="android:textSize">25sp</item>
+        <item name="android:textSize">@dimen/text_title_size</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:gravity">left</item>
-        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_marginBottom">@dimen/margin_small</item>
     </style>
 
     <style name="TituloPrincipalCardview">
-        <item name="android:textSize">25sp</item>
+        <item name="android:textSize">@dimen/text_title_size</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">#212121</item>
         <item name="android:gravity">left</item>
-        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_marginBottom">@dimen/margin_small</item>
     </style>
 
     <style name="TituloHome">
-        <item name="android:textSize">25sp</item>
+        <item name="android:textSize">@dimen/text_title_size</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:gravity">center</item>
-        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_marginBottom">@dimen/margin_small</item>
     </style>
 
     <style name="TituloCentrado">
-        <item name="android:padding">20dp</item>
-        <item name="android:textSize">25sp</item>
+        <item name="android:padding">@dimen/padding_medium</item>
+        <item name="android:textSize">@dimen/text_title_size</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:gravity">center</item>
     </style>
 
+    <!-- Subtextos -->
     <style name="SubTexto">
-        <item name="android:textSize">10sp</item>
+        <item name="android:textSize">@dimen/text_sub_size</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:gravity">left</item>
     </style>
 
     <style name="SubTextoCardview">
-        <item name="android:textSize">10sp</item>
+        <item name="android:textSize">@dimen/text_sub_size</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">#757575</item>
         <item name="android:gravity">left</item>
     </style>
 
     <style name="TituloSecundario">
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">@dimen/text_secondary_size</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:gravity">left</item>
     </style>
 
     <style name="TituloSecundarioHome">
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">@dimen/text_secondary_size</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:gravity">center</item>
     </style>
 
+    <!-- CardViews -->
     <style name="EstiloCardView">
-        <item name="android:layout_marginBottom">20dp</item>
-        <item name="cardElevation">5dp</item>
-        <item name="cardCornerRadius">12dp</item>
+        <item name="android:layout_marginBottom">@dimen/card_margin_bottom</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
         <item name="cardBackgroundColor">?android:attr/colorAccent</item>
         <item name="android:textColor">?android:attr/colorPrimary</item>
     </style>
 
     <style name="EstiloCardViewEjercicios">
         <item name="android:layout_weight">1</item>
-        <item name="android:layout_marginBottom">20dp</item>
+        <item name="android:layout_marginBottom">@dimen/card_margin_bottom</item>
         <item name="backgroundTint">@color/white</item>
-        <item name="elevation">6dp</item>
-        <item name="android:radius">12dp</item>
-        <item name="android:padding">8dp</item>
+        <item name="elevation">@dimen/card_elevation</item>
+        <item name="android:radius">@dimen/card_corner_radius</item>
+        <item name="android:padding">@dimen/card_padding</item>
     </style>
 
-    <style name="EstiloSpinner" >
-        <item name="android:padding">12dp</item>
+    <!-- Spinner -->
+    <style name="EstiloSpinner">
+        <item name="android:padding">@dimen/spinner_padding</item>
     </style>
 
+    <!-- Imagen botón -->
     <style name="EstiloBotonImagen">
         <item name="android:layout_gravity">right</item>
         <item name="android:layout_marginTop">35dp</item>
@@ -120,15 +131,16 @@
         <item name="android:layout_marginRight">10dp</item>
     </style>
 
-<!--    <style name="EstiloBarraDeProgreso">-->
-<!--        <item name="progressBarStyle">@style/Widget.AppCompat.ProgressBar.Horizontal</item>-->
-<!--        <item name="android:layout_width">250dp</item>-->
-<!--        <item name="android:layout_height">20dp</item>-->
-<!--        <item name="android:layout_gravity">center</item>-->
-<!--        <item name="android:max">100</item>-->
-<!--        <item name="android:progress">75</item>-->
-<!--        <item name="android:layout_marginTop">16dp</item>-->
-<!--        <item name="android:layout_marginBottom">20dp</item>-->
-<!--    </style>-->
+    <!-- Barra de progreso -->
+    <style name="EstiloBarraDeProgreso">
+        <item name="progressBarStyle">@style/Widget.AppCompat.ProgressBar.Horizontal</item>
+        <item name="android:layout_width">@dimen/progress_width</item>
+        <item name="android:layout_height">@dimen/progress_height</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:max">100</item>
+        <item name="android:progress">75</item>
+        <item name="android:layout_marginTop">@dimen/progress_margin_top</item>
+        <item name="android:layout_marginBottom">@dimen/progress_margin_bottom</item>
+    </style>
 
 </resources>
