@@ -3,15 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    style="@style/Base.Theme.UT2_App"
+    >
 
-    <!-- Contenedor donde se cargarán los fragmentos -->
+    <!-- Contenedor donde se cargan los fragmentos -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_container"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        app:defaultNavHost="false"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_graph"
         />
 
     <!-- Menú inferior -->
@@ -20,6 +24,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:menu="@menu/bottom_nav_menu"
-        android:background="?android:attr/windowBackground"
+        android:background="?android:attr/colorPrimary"
         />
 </LinearLayout>

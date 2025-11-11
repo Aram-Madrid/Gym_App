@@ -4,9 +4,9 @@
     android:id="@+id/layout_login"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="25dp"
+    style="@style/Base.Theme.UT2_App">
 
     <ImageView
         android:layout_width="wrap_content"
@@ -22,10 +22,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/iniciar_sesion"
         android:text="@string/iniciar_sesion"
-        android:textSize="25sp"
-        android:textStyle="bold"
-        android:textColor="@color/white"
-        android:layout_marginBottom="25dp"
+        style="@style/TituloPrincipal"
         />
 
     <EditText
@@ -33,11 +30,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/edit_text_email"
         android:hint="@string/email"
-        android:textColor="@color/black"
-        android:textColorHint="#DB2187"
-        android:background="#DBDBDB"
-        android:padding="5dp"
-        android:layout_marginBottom="15dp"
+        style="@style/EstiloEditText"
         />
 
     <EditText
@@ -45,32 +38,22 @@
         android:layout_height="wrap_content"
         android:id="@+id/edit_text_pwd"
         android:hint="@string/password"
-        android:textColor="@color/black"
-        android:textColorHint="@color/hint_color"
-        android:background="@color/edit_background"
-        android:padding="5dp"
-        android:layout_marginBottom="15dp"
+        style="@style/EstiloEditText"
         />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button_iniciar_sesion"
-        android:backgroundTint="@color/hint_color"
-        android:layout_gravity="center"
         android:text="@string/iniciar_sesion"
-        android:textSize="25sp"
-        android:layout_marginBottom="15dp"
+        style="@style/EstiloBoton"
         />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button_crear_cuenta"
-        android:backgroundTint="@color/hint_color"
-        android:layout_gravity="center"
         android:text="@string/crear_cuenta"
-        android:textSize="25sp"
-        android:layout_marginBottom="15dp"
+        style="@style/EstiloBoton"
         />
 </LinearLayout>

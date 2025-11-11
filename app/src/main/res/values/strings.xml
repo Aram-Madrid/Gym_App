@@ -11,5 +11,36 @@
     <string name="home">Home</string>
     <string name="mi_rutina">Mi Rutina</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="confirmar">Confirmar</string>
+    <string name="cambiar_foto">Cambiar Foto</string>
+    <string name="tema">Tema</string>
+    <string name="escriba_aqu">Escriba aquí</string>
+    <string name="cambiar_nombre">Cambiar nombre</string>
+    <string name="configuraci_n">Configuración</string>
+    <string name="cerrar_sesion">Cerrar Sesion</string>
+    <string name="ranking_n_1">Ranking: nº 1</string>
+    <string name="lunes">Lunes</string>
+    <string name="nombre_ejercicio">Nombre Ejercicio</string>
+    <string name="n_mero_de_series">Número de series:</string>
+    <string name="flexiones">Flexiones</string>
+    <string name="ejercicio">Ejercicio</string>
+    <string name="establecer_series">Establecer series</string>
+    <string name="guardar_series">Guardar series</string>
+    <string name="selecciona_ejercicios">Selecciona ejercicios</string>
+    <string name="plus">+</string>
+    <string name="nombre_del_usuario">Nombre del usuario</string>
+    <string name="_1200_puntos">1200 puntos</string>
+    <string name="serie_1">Serie 1</string>
+    <string name="peso">Peso</string>
+    <string name="repeticiones">Repeticiones</string>
+    <string name="selecciona_ejercicio">Selecciona ejercicio</string>
+    <string name="series">Series</string>
+    <string name="numero_de_series">Número de series</string>
+    <string name="rutina_del_dia">Rutina del día</string>
+    <string name="agregar_ejercicio">+ Agregar ejercicio</string>
+    <string name="series_del_ejercicio">Series del ejercicio</string>
+    <string name="aqui_podrias_mostrar_las_series_guardadas">Aqui podrias mostrar las series guardadas...</string>
+    <string name="volver">Volver</string>
+    <string name="nombre_del_ejercicio">Nombre del ejercicio</string>
+    <string name="sin_series_registradas">Sin series registradas</string>
 </resources>

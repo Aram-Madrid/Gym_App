@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    style="@style/Base.Theme.UT2_App"
+    >
+
+    <TextView
+        android:id="@+id/textViewTitulo"
+        android:text="@string/series_del_ejercicio"
+        style="@style/TituloPrincipal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:text="@string/aqui_podrias_mostrar_las_series_guardadas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+
+    <Button
+        android:id="@+id/btnFinalizar"
+        android:text="@string/volver"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/EstiloBoton"
+        />
+</LinearLayout>

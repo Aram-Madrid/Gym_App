@@ -1,0 +1,90 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    style="@style/Base.Theme.UT2_App"
+    >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="25dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Título -->
+        <TextView
+            android:text="@string/selecciona_ejercicio"
+            style="@style/TituloPrincipal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+        <!-- Spinner de ejercicios -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/EstiloCardView"
+            >
+
+            <Spinner
+                android:id="@+id/spinnerEjercicios"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/EstiloSpinner"
+                />
+        </androidx.cardview.widget.CardView>
+
+        <!-- Número de series -->
+        <TextView
+            android:text="@string/series"
+            style="@style/TituloSecundario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/numero_de_series"
+            android:id="@+id/editTextNumSeries"
+            style="@style/EstiloEditText"
+        />
+
+<!--            <EditText-->
+<!--                android:id="@+id/editTextNumSeries"-->
+<!--                android:hint="Número de series"-->
+<!--                style="@style/EstiloEditText"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_width="match_parent"/>-->
+
+        <!-- Botón establecer -->
+        <Button
+            android:id="@+id/btnEstablecerSeries"
+            android:text="@string/establecer_series"
+            style="@style/EstiloBoton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+        <!-- Series generadas -->
+        <LinearLayout
+            android:id="@+id/linearLayoutSeries"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+        <!-- Botón confirmar -->
+        <Button
+            android:id="@+id/btnConfirmar"
+            android:text="@string/confirmar"
+            style="@style/EstiloBoton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+    </LinearLayout>
+</ScrollView>

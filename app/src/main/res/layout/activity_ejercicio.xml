@@ -1,0 +1,45 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/Base.Theme.UT2_App"
+    >
+
+    <!-- Título de la rutina -->
+    <TextView
+        android:id="@+id/textViewTitulo"
+        android:text="@string/rutina_del_dia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TituloPrincipal"
+        />
+
+    <!-- Contenedor de los ejercicios -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        style="@style/EstiloCardViewEjercicios"
+        >
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewEjercicios"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Botón de agregar ejercicio -->
+    <Button
+        android:id="@+id/btnAgregarEjercicio"
+        style="@style/EstiloBoton"
+        android:text="@string/agregar_ejercicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+</LinearLayout>

@@ -1,0 +1,41 @@
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    card_view:cardCornerRadius="14dp"
+    card_view:cardElevation="6dp"
+    card_view:cardBackgroundColor="#FFFFFF"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Nombre del ejercicio -->
+        <TextView
+            android:id="@+id/textViewNombreEjercicio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/nombre_del_ejercicio"
+            style="@style/TituloPrincipalCardview"
+            android:fontFamily="sans-serif-medium"
+            />
+
+        <!-- Resumen de series -->
+        <TextView
+            android:id="@+id/textViewResumenSeries"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sin_series_registradas"
+            style="@style/SubTextoCardview"
+            android:fontFamily="sans-serif" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

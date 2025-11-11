@@ -1,15 +1,66 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    style="@style/Base.Theme.UT2_App"
+    >
+
+
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/boton_configuracion"
+        android:src="@drawable/settings_icon"
+        style="@style/EstiloBotonImagen"
+        />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    </LinearLayout>
 
     <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:id="@+id/textViewHome"
-        android:text="Home Coming Soon"
-        android:textSize="25sp"
-        android:textStyle="bold" />
+        android:text="@string/nombre_de_usuario"
+        style="@style/TituloHome"
+        >
 
+    </TextView>
+
+    <FrameLayout
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="35dp"
+        android:background="@drawable/circle_shape_bronce">
+
+        <ImageView
+            android:id="@+id/emblema_ranking"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:src="@drawable/place_holder"
+            android:background="@drawable/circle_clip"
+            android:clipToOutline="true"
+            android:layout_margin="3dp" />
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/ranking_n_1"
+        style="@style/TituloSecundarioHome"
+        />
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/composeView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 </LinearLayout>
