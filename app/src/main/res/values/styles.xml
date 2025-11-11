@@ -5,6 +5,7 @@
         <item name="android:layout_gravity">center</item>
         <item name="android:layout_marginTop">15dp</item>
         <item name="android:backgroundTint">?android:attr/colorPrimary</item>
+        <item name="android:layout_marginBottom">25dp</item>
     </style>
 
     <style name="EstiloEditText" parent="Widget.AppCompat.EditText">
@@ -36,6 +37,7 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:gravity">left</item>
         <item name="android:layout_marginBottom">10dp</item>
+        <item name ="android:layout_marginTop">10dp</item>
     </style>
 
     <style name="TituloPrincipalCardview">
