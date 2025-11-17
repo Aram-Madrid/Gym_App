@@ -15,4 +15,5 @@
         android:id="@+id/miRutinaFragment"
         android:name="com.example.ut2_app.fragments.MiRutinaFragment"
         android:label="MiRutinaFragment" />
+
 </navigation>

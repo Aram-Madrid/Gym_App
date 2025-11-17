@@ -68,6 +68,10 @@ dependencies {
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
+    // SplashScreen compat para Android 12+
+        implementation ("androidx.core:core-splashscreen:1.0.1")
+
+
     // AndroidX / soporte
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
