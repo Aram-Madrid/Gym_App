@@ -6,6 +6,7 @@
         <item name="android:textSize">@dimen/text_button_size</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:layout_marginTop">@dimen/button_margin_top</item>
+        <item name="android:layout_marginBottom">@dimen/button_margin_bottom</item>
         <item name="android:backgroundTint">?android:attr/colorPrimary</item>
         <item name="android:height">@dimen/button_height</item>
     </style>
