@@ -79,7 +79,7 @@ class CrearCuentaActivity : AppCompatActivity() {
                         }
                 }
                 .addOnFailureListener { e ->
-                    Toast.makeText(this, "Error al crear la cuenta: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error al crear la cuenta: Introduzca un correo electrónico válido", Toast.LENGTH_SHORT).show()
                 }
         }
     }
