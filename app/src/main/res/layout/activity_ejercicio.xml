@@ -8,18 +8,18 @@
     tools:context=".activities.EjercicioActivity">
 
     <!-- Botón para volver al fragmento mi rutina -->
+
+
+    <!-- Título de la rutina -->
     <ImageView
+        android:id="@+id/boton_vuelta_rutina"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="left"
-        android:id="@+id/boton_vuelta_rutina"
         android:src="@drawable/back_icon">
 
     </ImageView>
 
-
-
-    <!-- Título de la rutina -->
     <TextView
         android:id="@+id/textViewTitulo"
         android:text="@string/rutina_del_dia"
@@ -49,8 +49,8 @@
     <Button
         android:id="@+id/btnAgregarEjercicio"
         style="@style/EstiloBoton"
-        android:text="@string/agregar_ejercicio"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="@string/agregar_ejercicio" />
 
 </LinearLayout>

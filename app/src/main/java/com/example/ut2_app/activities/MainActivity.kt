@@ -7,6 +7,8 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.ut2_app.R
 import com.example.ut2_app.databinding.ActivityMainBinding
+import android.content.Intent
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -24,13 +26,31 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
         val navController = navHostFragment.navController
 
-        // Si venimos desde EjercicioActivity, abrir MiRutinaFragment
-        val abrirMiRutina = intent.getBooleanExtra("abrir_mirutina", false)
-        if (abrirMiRutina && savedInstanceState == null) {
-            navController.navigate(R.id.miRutinaFragment)
-        }
-
         // Listener del menú inferior
         binding.bottomNavigation.setupWithNavController(navController)
+
+        // Volver a dejar la selección inicial en Home
+        binding.bottomNavigation.selectedItemId = R.id.homeFragment
+
+        // Si venimos desde EjercicioActivity, abrir MiRutinaFragment
+        val destino = intent.getStringExtra("abrir_fragmento")
+        if (destino == "mi_rutina" && savedInstanceState == null){
+            navController.navigate(R.id.miRutinaFragment)
+        }
     }
+
+    // Manejar nuevos intents cuando MainActivity ya estaba en la pila
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+
+        val destino = intent.getStringExtra("abrir_fragmento")
+        if (destino == "mi_rutina") {
+            val navHostFragment =
+                supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
+            val navController = navHostFragment.navController
+            navController.navigate(R.id.miRutinaFragment)
+        }
+    }
+
 }

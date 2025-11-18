@@ -10,7 +10,7 @@
         android:id="@+id/logoSplash"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:src="@mipmap/ic_gym"
+        android:src="@mipmap/ic_gym_app"
         android:layout_centerHorizontal="true" />
 
     <!-- Título -->
