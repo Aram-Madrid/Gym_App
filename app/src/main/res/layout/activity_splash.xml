@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="@color/splash_background_dark">
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/logoSplash"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@mipmap/ic_gym"
+        android:layout_centerHorizontal="true" />
+
+    <!-- Título -->
+    <TextView
+        android:id="@+id/titleSplash"
+        android:layout_below="@id/logoSplash"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/fitrank"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/splash_text_dark"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>
