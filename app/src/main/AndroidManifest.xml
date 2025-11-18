@@ -1,44 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.ut2_app">
 
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_gym"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_gym_round"
+        android:icon="@mipmap/ic_gym2"
+        android:label="@string/fitrank"
         android:supportsRtl="true"
         android:theme="@style/Theme.UT2_App">
-        <activity
-            android:name=".activities.SerieActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.EjercicioActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.DetalleEjercicioActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.ConfiguracionActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.CrearCuentaActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.LoginActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+        <activity
+            android:name=".activities.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.UT2_App">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!-- LoginActivity -->
+        <activity android:name=".activities.LoginActivity" android:exported="false" />
+
+        <!-- MainActivity -->
         <activity
             android:name=".activities.MainActivity"
-            android:exported="false" />
-    </application>
+            android:launchMode="singleTop"
+            android:exported="true" />
 
+
+        <!-- Otras actividades -->
+        <activity android:name=".activities.SerieActivity" android:exported="false" />
+        <activity android:name=".activities.EjercicioActivity" android:exported="false" />
+        <activity android:name=".activities.DetalleEjercicioActivity" android:exported="false" />
+        <activity android:name=".activities.ConfiguracionActivity" android:exported="false" />
+        <activity android:name=".activities.CrearCuentaActivity" android:exported="false" />
+
+    </application>
 </manifest>

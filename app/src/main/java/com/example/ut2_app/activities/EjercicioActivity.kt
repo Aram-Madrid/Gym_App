@@ -36,10 +36,12 @@ class EjercicioActivity : AppCompatActivity() {
             startActivityForResult(intent, 1)
         }
 
-        //Bóton para volver a MainActivity
+        //Bóton para volver a MiRutinaFragment
         binding.botonVueltaRutina.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
-            startActivityForResult(intent, 1)
+            intent.putExtra("abrir_mirutina", true)
+            startActivity(intent)
+            finish()
         }
     }
 

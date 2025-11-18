@@ -6,6 +6,5 @@
         <item name="android:textColorPrimary">#000000</item>
         <item name="android:windowBackground">#FAFAFA</item>
     </style>
-
     <style name="Theme.UT2_App" parent="Base.Theme.UT2_App" />
 </resources>
