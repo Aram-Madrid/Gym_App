@@ -3,7 +3,6 @@ package com.example.ut2_app.activities
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.fragment.NavHostFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ut2_app.R
 import com.example.ut2_app.adapters.EjercicioAdapter
@@ -39,9 +38,10 @@ class EjercicioActivity : AppCompatActivity() {
         //Bóton para volver a MiRutinaFragment
         binding.botonVueltaRutina.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("abrir_mirutina", true)
+            intent.putExtra("abrir_fragmento", "mi_rutina")
+            // Reutilizar la instancia existente de MainActivity en la pila
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
-            finish()
         }
     }
 
