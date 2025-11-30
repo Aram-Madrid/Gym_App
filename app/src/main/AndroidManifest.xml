@@ -37,4 +37,5 @@
         <activity android:name=".activities.CrearCuentaActivity" android:exported="false" />
 
     </application>
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
