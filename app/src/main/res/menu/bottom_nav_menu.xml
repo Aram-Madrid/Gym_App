@@ -6,7 +6,7 @@
         android:icon="@drawable/trophy_icon" />
 
     <item
-        android:id="@+id/homeFragment2"
+        android:id="@+id/homeFragment"
         android:title="@string/home"
         android:icon="@drawable/home_icon"
         />
