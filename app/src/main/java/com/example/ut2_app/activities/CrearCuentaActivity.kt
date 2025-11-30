@@ -4,83 +4,102 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.ut2_app.databinding.ActivityCrearCuentaBinding
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.ut2_app.model.Usuario
+import com.example.ut2_app.util.SupabaseClientProvider
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.launch
 
 class CrearCuentaActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCrearCuentaBinding
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
+    private val supabase = SupabaseClientProvider.supabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCrearCuentaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //autenticacion y guardar datos
-        auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
-
         binding.buttonCrearCuenta.setOnClickListener {
             val email = binding.editTextEmail.text.toString().trim()
             val password = binding.editTextPwd.text.toString().trim()
             val nombre = binding.nombreUsuario.text.toString().trim()
-            val altura = binding.alturaUsuario.text.toString().trim()
-            val peso = binding.peso.text.toString().trim()
+            val alturaStr = binding.alturaUsuario.text.toString().trim()
+            val pesoStr = binding.peso.text.toString().trim()
 
-            if (email.isEmpty() || password.isEmpty() || nombre.isEmpty() || altura.isEmpty() || peso.isEmpty()) {
-                Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
+            if (email.isEmpty() || password.isEmpty() || nombre.isEmpty() ||
+                alturaStr.isEmpty() || pesoStr.isEmpty()
+            ) {
+                Toast.makeText(
+                    this,
+                    "Por favor, completa todos los campos",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
-            // Crear usuario en firebase
-            auth.createUserWithEmailAndPassword(email, password)
-                .addOnSuccessListener { result ->
-                    val userId = result.user?.uid ?: return@addOnSuccessListener
+            crearCuentaSupabase(email, password, nombre, alturaStr, pesoStr)
+        }
+    }
 
-                    // Datos "Default" para el futuro
-                    val datosUsuario = hashMapOf(
-                        "nombre" to nombre,
-                        "email" to email,
-                        "altura" to altura,
-                        "peso" to peso,
-                        "elo" to 0,
-                        "rango" to "Bronze",
-                        "fotoPerfilUrl" to ""
+    private fun crearCuentaSupabase(
+        email: String,
+        password: String,
+        nombre: String,
+        alturaStr: String,
+        pesoStr: String
+    ) {
+        lifecycleScope.launch {
+            try {
+                // 1. Crear usuario en Auth
+                supabase.auth.signUpWith(Email) {
+                    this.email = email
+                    this.password = password
+                }
+
+                // 2. Obtener el usuario recién creado
+                val authUser = supabase.auth.currentUserOrNull()
+
+                if (authUser != null) {
+
+                    // 3. Construir el objeto Usuario
+                    val usuario = Usuario(
+                        id = authUser.id,
+                        nombre = nombre,
+                        email = email,
+                        altura = alturaStr.toIntOrNull(),
+                        peso = pesoStr.toIntOrNull()
                     )
 
-                    
+                    // 4. Guardarlo en la tabla "usuarios"
+                    supabase.postgrest["usuarios"].insert(usuario)
 
-                    db.collection("usuarios").document(userId).set(datosUsuario)
-                        .addOnSuccessListener {
-                            Toast.makeText(this, "Cuenta creada correctamente", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@CrearCuentaActivity,
+                        "Cuenta creada correctamente",
+                        Toast.LENGTH_SHORT
+                    ).show()
 
-                            // coleccion vacia de amigos
-                            val amigosRef = db.collection("usuarios")
-                                .document(userId)
-                                .collection("amigos")
+                    startActivity(Intent(this@CrearCuentaActivity, MainActivity::class.java))
+                    finish()
 
-                            amigosRef.add(hashMapOf("placeholder" to true))
-                                .addOnSuccessListener { doc ->
-                                    doc.delete() // elimina el placeholder
-                                }
-                                .addOnFailureListener { e ->
-                                    Toast.makeText(this, "Error creando subcolección amigos: ${e.message}", Toast.LENGTH_SHORT).show()
-                                }
-
-                            // Ir a mainActivity
-                            val intent = Intent(this, MainActivity::class.java)
-                            startActivity(intent)
-                            finish()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "Error al guardar los datos: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
+                } else {
+                    Toast.makeText(
+                        this@CrearCuentaActivity,
+                        "Verifica tu correo e inicia sesión",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "Error al crear la cuenta: Introduzca un correo electrónico válido", Toast.LENGTH_SHORT).show()
-                }
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@CrearCuentaActivity,
+                    "Error creando cuenta: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 }
