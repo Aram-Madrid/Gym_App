@@ -10,6 +10,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+// *************** IMPORTAR LA ESTRATEGIA DE CACHÉ ***************
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.ut2_app.R
 
 data class Usuario(
@@ -51,6 +53,10 @@ class RankingAdapter(
         if (!usuario.fotoUrl.isNullOrEmpty()) {
             Glide.with(context)
                 .load(usuario.fotoUrl)
+                // *************** LÍNEAS AGREGADAS PARA SOLUCIONAR EL CACHÉ ***************
+                .diskCacheStrategy(DiskCacheStrategy.NONE) // Fuerza a ignorar la caché de disco
+                .skipMemoryCache(true)                      // Fuerza a ignorar la caché de memoria
+                // *************************************************************************
                 .placeholder(R.drawable.place_holder)
                 .into(holder.imgFoto)
         } else {
