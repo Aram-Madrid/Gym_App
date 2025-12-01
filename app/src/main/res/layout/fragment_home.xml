@@ -23,11 +23,11 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/nombre_usuario"
+        style="@style/TituloHome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/nombre_de_usuario"
-        style="@style/TituloHome"
-        >
+        android:text="@string/nombre_de_usuario">
 
     </TextView>
 
@@ -52,6 +52,7 @@
     </FrameLayout>
 
     <TextView
+        android:id="@+id/ranking_usuario"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/ranking_n_1"
