@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
+import coil.load // Usaremos COIL para cargar la foto de perfil (si no usas Coil, reemplázalo por Glide/Picasso)
 import com.example.ut2_app.R
 import com.example.ut2_app.databinding.ActivityConfiguracionBinding
 import com.example.ut2_app.util.SupabaseClientProvider
@@ -21,9 +22,17 @@ import io.github.jan.supabase.storage.upload
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+
+// Data class para cargar los datos iniciales
+@Serializable
+data class UserProfile(
+    val nombre: String? = null,
+    val fotoperfilurl: String? = null
+)
 
 class ConfiguracionActivity : AppCompatActivity() {
 
@@ -39,19 +48,21 @@ class ConfiguracionActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupGalleryLauncher()
+        cargarDatosIniciales() // NUEVA LLAMADA PARA CARGAR NOMBRE Y FOTO
 
-        binding.imgFotoPerfil.setImageResource(R.drawable.place_holder)
-
+        // --- Lógica del Switch de Tema ---
         val sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE)
         modoOscuro = sharedPref.getBoolean("modoOscuro", false)
 
         if (modoOscuro) {
-            binding.bolaSwitch.translationX = binding.fondoSwitch.width - binding.bolaSwitch.width - 8f
+            // Se usa post para asegurar que el layout está medido
+            binding.fondoSwitch.post {
+                binding.bolaSwitch.translationX = binding.fondoSwitch.width - binding.bolaSwitch.width - 8f
+            }
         }
 
         val fondoAnimado = binding.fondoSwitch.background as TransitionDrawable
 
-        // Cambiar tema con animación del switch
         binding.fondoSwitch.setOnClickListener {
             val bola = binding.bolaSwitch
             val moverA: Float
@@ -71,11 +82,95 @@ class ConfiguracionActivity : AppCompatActivity() {
                 }
                 fondoAnimado.reverseTransition(300)
             }
-            modoOscuro =!modoOscuro
+            modoOscuro = !modoOscuro
+        }
+        // ----------------------------------
+
+        // Click en botón confirmar (Añadimos lógica de cambio de nombre)
+        binding.btnConfirmar.setOnClickListener {
+            val nuevoNombre = binding.editTextNombre.text.toString().trim()
+            actualizarPerfilYTema(nuevoNombre) // LÓGICA DE ACTUALIZACIÓN COMBINADA
         }
 
-        // Click en botón confirmar
-        binding.btnConfirmar.setOnClickListener {
+        // CERRAR SESIÓN (Sin cambios)
+        binding.btnCerrarSesion.setOnClickListener {
+            // ... (código para cerrar sesión)
+            lifecycleScope.launch {
+                try {
+                    supabase.auth.signOut()
+                    Toast.makeText(this@ConfiguracionActivity, "Sesión cerrada correctamente", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this@ConfiguracionActivity, LoginActivity::class.java) // ASUMIENDO LoginActivity
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                } catch (e: Exception) {
+                    Toast.makeText(this@ConfiguracionActivity, "Error al cerrar sesión: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
+        // SUBIR FOTO DE PERFIL (Sin cambios)
+        binding.imgFotoPerfil.setOnClickListener {
+            galleryLauncher.launch("image/*")
+        }
+    }
+
+    // --- NUEVAS FUNCIONES Y MODIFICACIONES ---
+
+    private fun cargarDatosIniciales() {
+        val userId = supabase.auth.currentUserOrNull()?.id ?: return
+
+        lifecycleScope.launch {
+            try {
+                val profile = supabase.postgrest["usuarios"]
+                    .select { filter { eq("id", userId) } }
+                    .decodeSingle<UserProfile>()
+
+                // Cargar Nombre
+                binding.editTextNombre.setText(profile.nombre)
+
+                // Cargar Foto (Usando Coil para evitar problemas de caché, similar al RankingAdapter)
+                if (!profile.fotoperfilurl.isNullOrEmpty()) {
+                    val url = profile.fotoperfilurl
+                    val cacheBustingUrl = "$url?v=${System.currentTimeMillis()}"
+
+                    binding.imgFotoPerfil.load(cacheBustingUrl) {
+                        crossfade(true)
+                        error(com.example.ut2_app.R.drawable.place_holder)
+                        placeholder(com.example.ut2_app.R.drawable.place_holder)
+                    }
+                } else {
+                    binding.imgFotoPerfil.setImageResource(com.example.ut2_app.R.drawable.place_holder)
+                }
+
+            } catch (e: Exception) {
+                Toast.makeText(this@ConfiguracionActivity, "Error al cargar perfil: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun actualizarPerfilYTema(nuevoNombre: String) {
+        val userId = supabase.auth.currentUserOrNull()?.id ?: return
+        val sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+
+        lifecycleScope.launch {
+            var nombreActualizado = false
+
+            // Lógica de Actualización de Nombre
+            if (nuevoNombre.isNotEmpty()) {
+                try {
+                    supabase.postgrest["usuarios"]
+                        .update(mapOf("nombre" to nuevoNombre)) {
+                            filter { eq("id", userId) }
+                        }
+                    nombreActualizado = true
+                } catch (e: Exception) {
+                    Toast.makeText(this@ConfiguracionActivity, "Error al actualizar nombre: ${e.message}", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+            }
+
+            // Lógica de Actualización de Tema
             sharedPref.edit().putBoolean("modoOscuro", modoOscuro).apply()
 
             if (modoOscuro) {
@@ -84,38 +179,22 @@ class ConfiguracionActivity : AppCompatActivity() {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
 
-            Toast.makeText(this, "Cambios aplicados", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
-
-        // CERRAR SESIÓN (Sin cambios)
-        binding.btnCerrarSesion.setOnClickListener {
-            lifecycleScope.launch {
-                try {
-                    supabase.auth.signOut()
-                    Toast.makeText(this@ConfiguracionActivity, "Sesión cerrada correctamente", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this@ConfiguracionActivity, LoginActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
-                } catch (e: Exception) {
-                    Toast.makeText(
-                        this@ConfiguracionActivity,
-                        "Error al cerrar sesión: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+            if (nombreActualizado) {
+                Toast.makeText(this@ConfiguracionActivity, "Nombre y tema actualizados.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this@ConfiguracionActivity, "Tema actualizado.", Toast.LENGTH_SHORT).show()
             }
-        }
 
-        // SUBIR FOTO DE PERFIL
-        binding.imgFotoPerfil.setOnClickListener {
-            galleryLauncher.launch("image/*")
+            // Navegar de vuelta
+            startActivity(Intent(this@ConfiguracionActivity, MainActivity::class.java)) // ASUMIENDO MainActivity
+            finish()
         }
     }
 
+    // --- MÉTODOS DE SUBIDA DE FOTO ---
+
     private fun setupGalleryLauncher() {
+        // ... (código existente)
         galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
                 binding.imgFotoPerfil.setImageURI(it)
@@ -125,6 +204,7 @@ class ConfiguracionActivity : AppCompatActivity() {
     }
 
     private fun subirFotoPerfil(uri: Uri) {
+        // ... (código existente)
         val userId = supabase.auth.currentUserOrNull()?.id
         if (userId == null) {
             Toast.makeText(this, "Debe iniciar sesión para subir fotos.", Toast.LENGTH_SHORT).show()
@@ -133,25 +213,21 @@ class ConfiguracionActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // 1. Convertir URI de Android a un archivo temporal (Debe hacerse en un hilo de IO)
                 val tempFile = withContext(Dispatchers.IO) {
                     uriToFile(uri, userId)
                 }
 
-                val bucketName = "profile_pictures" // Bucket solicitado
+                val bucketName = "profile_pictures"
                 val filePath = "$userId/avatar.jpg"
 
-                // 2. Subir el archivo a Supabase Storage
                 supabase.storage.from(bucketName)
                     .upload(filePath, tempFile) {
                         upsert = true
                     }
 
-                // 3. Obtener la URL pública de la imagen
                 val publicUrl = supabase.storage.from(bucketName)
                     .publicUrl(filePath)
 
-                // 4. Actualizar el campo 'fotoperfilurl' en la tabla 'usuarios'
                 supabase.postgrest["usuarios"]
                     .update(
                         mapOf("fotoperfilurl" to publicUrl)
@@ -168,6 +244,7 @@ class ConfiguracionActivity : AppCompatActivity() {
     }
 
     private fun uriToFile(uri: Uri, userId: String): File {
+        // ... (código existente)
         val inputStream: InputStream? = contentResolver.openInputStream(uri)
         requireNotNull(inputStream) { "No se pudo abrir el InputStream para la URI." }
 
