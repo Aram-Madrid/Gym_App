@@ -18,6 +18,13 @@
         <item name="android:padding">@dimen/edit_padding</item>
     </style>
 
+    <style name="EstiloEditTextPwd" parent="Widget.AppCompat.EditText">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColorHint">?android:attr/colorPrimary</item>
+        <item name="android:padding">@dimen/edit_padding</item>
+        <item name="android:inputType">textPassword</item>
+    </style>
+
     <!-- EditText numerico -->
     <style name="EstiloEditNumero" parent="Widget.AppCompat.EditText">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
