@@ -1,4 +1,4 @@
-# FitRank: Récords y Competición en tus Rutinas de Entrenamiento
+# FitRank
 Una aplicación móvil desarrollada en Kotlin para Android, diseñada para transformar el seguimiento de tus rutinas de gimnasio en una experiencia competitiva y motivadora.
 
 ## 1. Introducción: Propósito y Usuarios Destinatarios
