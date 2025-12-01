@@ -1,5 +1,6 @@
 package com.example.ut2_app.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,21 +18,26 @@ class EjercicioAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(ejercicio: Ejercicio) {
+            Log.d("EjercicioAdapter", "Mostrando ejercicio: ${ejercicio.nombre}, reps=${ejercicio.reps}, peso=${ejercicio.peso}")
+
+            // Mostrar nombre del ejercicio
             binding.textViewNombreEjercicio.text = ejercicio.nombre
 
-            // Mostrar resumen de series
-            if (ejercicio.series.isNotEmpty()) {
-                val resumen = ejercicio.series.mapIndexed { index, serie ->
-                    // Usamos String.format para mejor formato de punto flotante
-                    "Serie ${index + 1}: %.1f kg x ${serie.repeticiones}".format(serie.peso)
-                }.joinToString("\n")
-
-                binding.textViewResumenSeries.text = resumen
-                binding.textViewResumenSeries.visibility = View.VISIBLE
-            } else {
-                binding.textViewResumenSeries.text = "Sin series registradas"
-                binding.textViewResumenSeries.visibility = View.VISIBLE
+            // 🔑 Mostrar resumen: Reps totales y Peso
+            val resumen = buildString {
+                append("Total: ${ejercicio.reps} reps")
+                if (ejercicio.peso > 0) {
+                    append(" • Peso: ${String.format("%.1f", ejercicio.peso)} kg")
+                }
+                if (ejercicio.dificultad > 0) {
+                    append(" • Dificultad: ${String.format("%.1f", ejercicio.dificultad)}")
+                }
             }
+
+            binding.textViewResumenSeries.text = resumen
+            binding.textViewResumenSeries.visibility = View.VISIBLE
+
+            Log.d("EjercicioAdapter", "Resumen mostrado: $resumen")
         }
     }
 

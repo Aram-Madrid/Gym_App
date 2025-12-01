@@ -1,26 +1,32 @@
 package com.example.ut2_app.activities
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+import android.text.InputType
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.ut2_app.R
 import com.example.ut2_app.databinding.ActivityDetalleEjercicioBinding
 import com.example.ut2_app.model.Ejercicio
+import com.example.ut2_app.model.EjercicioDetalle
 import com.example.ut2_app.viewmodels.DetalleEjercicioViewModel
 import android.util.Log
 
 class DetalleEjercicioActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetalleEjercicioBinding
-    private val viewModel: DetalleEjercicioViewModel by viewModels()
+    private val seriesViews = mutableListOf<Pair<EditText, EditText>>()
 
-    // Datos recibidos del Intent
-    private var idDiaRutina: String? = null // ID del día al que se asocia
-    private var idEjercicioExistente: String? = null // ID si estamos editando
+    private val viewModel: DetalleEjercicioViewModel by viewModels()
+    private var ejercicioSeleccionado: EjercicioDetalle? = null
+    private var catalogoCompleto: List<EjercicioDetalle> = emptyList()
+
+    private var idDiaRutina: String? = null
+    private var idEjercicioExistente: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,107 +37,240 @@ class DetalleEjercicioActivity : AppCompatActivity() {
         idDiaRutina = intent.getStringExtra("ID_DIA_RUTINA")
         idEjercicioExistente = intent.getStringExtra("EJERCICIO_ID")
 
-        if (idDiaRutina.isNullOrBlank()) {
-            Toast.makeText(this, "Error: Faltan datos esenciales de la rutina.", Toast.LENGTH_LONG).show()
+        // 🔑 Ahora el ID SIEMPRE debe estar presente porque la rutina se crea automáticamente
+        if (idDiaRutina == null) {
+            Toast.makeText(
+                this,
+                "Error: Datos incompletos. Vuelve a intentarlo.",
+                Toast.LENGTH_LONG
+            ).show()
             finish()
             return
         }
 
-        // ❌ No se llama a setSupportActionBar para evitar el error de referencia
-        // pero la Activity tiene un título por defecto
+        // Configurar título
+        title = if (idEjercicioExistente != null) "Editar Ejercicio" else "Añadir Ejercicio"
 
-        observeViewModel()
+        observeCatalogo()
+        observeViewModelStatus()
 
-        // 2. Cargar datos si estamos en modo Edición
-        if (idEjercicioExistente != null) {
-            viewModel.cargarEjercicio(idEjercicioExistente!!)
-            title = "Cargando..."
-        } else {
-            title = "Añadir Ejercicio"
-        }
-
-        // Mapear el botón Confirmar
-        binding.btnConfirmar.setOnClickListener {
-            guardarDatos()
-        }
-    }
-
-    // Método para llenar los campos de la UI (Modo Edición)
-    private fun llenarCampos(ejercicio: Ejercicio) {
-        // 🔑 ASUMIMOS que 'etNombre' y el resto de IDs ya existen en el XML:
-        binding.etNombre.setText(ejercicio.nombre)
-        binding.etRepeticiones.setText(ejercicio.reps.toString())
-        binding.etPeso.setText(ejercicio.peso.toString())
-        binding.etDificultad.setText(ejercicio.dificultad.toString())
-
-        title = "Editar: ${ejercicio.nombre}"
-    }
-
-    private fun observeViewModel() {
-        viewModel.ejercicio.observe(this) { ejercicio ->
-            if (ejercicio != null) {
-                llenarCampos(ejercicio)
-            } else if (idEjercicioExistente != null && viewModel.isLoading.value == false) {
-                Toast.makeText(this, "No se pudo cargar el ejercicio.", Toast.LENGTH_LONG).show()
+        // Botón Establecer Series
+        binding.btnEstablecerSeries.setOnClickListener {
+            val numSeries = binding.editTextNumSeries.text.toString().toIntOrNull()
+            if (numSeries != null && numSeries > 0) {
+                mostrarCamposSeries(numSeries)
+            } else {
+                Toast.makeText(
+                    this,
+                    "Introduce un número válido de series",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
 
-        viewModel.isLoading.observe(this) { isLoading ->
-            // Deshabilita el botón mientras guarda
-            binding.btnConfirmar.isEnabled = !isLoading
+        // Botón Confirmar
+        binding.btnConfirmar.setOnClickListener {
+            guardarDatos()
         }
 
-        // Manejo de estado: Éxito (cierra la activity y notifica a la anterior)
+        // Cargar datos si estamos en modo Edición
+        if (idEjercicioExistente != null) {
+            viewModel.cargarEjercicio(idEjercicioExistente!!)
+        }
+    }
+
+    private fun observeCatalogo() {
+        viewModel.isLoading.observe(this) { isLoading ->
+            binding.spinnerEjercicios.isEnabled = !isLoading
+            binding.btnConfirmar.isEnabled = !isLoading
+            binding.btnEstablecerSeries.isEnabled = !isLoading
+        }
+
+        viewModel.catalogoEjercicios.observe(this) { catalogo ->
+            if (catalogo.isNotEmpty()) {
+                catalogoCompleto = catalogo
+                setupSpinner(catalogo)
+            } else if (viewModel.isLoading.value == false) {
+                Toast.makeText(
+                    this,
+                    "No se pudo cargar el catálogo de ejercicios.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun setupSpinner(catalogo: List<EjercicioDetalle>) {
+        val nombresEjercicios = catalogo.map { it.nombre }
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            nombresEjercicios
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerEjercicios.adapter = adapter
+
+        binding.spinnerEjercicios.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                ejercicioSeleccionado = catalogoCompleto[position]
+                Log.d("DetalleEjercicio", "Ejercicio seleccionado: ${catalogoCompleto[position].nombre}")
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                ejercicioSeleccionado = null
+            }
+        }
+    }
+
+    private fun mostrarCamposSeries(numSeries: Int) {
+        binding.linearLayoutSeries.removeAllViews()
+        seriesViews.clear()
+
+        for (i in 1..numSeries) {
+            val tv = TextView(this)
+            tv.text = "Serie $i"
+            tv.textSize = 16f
+            tv.setPadding(0, 16, 0, 8)
+            binding.linearLayoutSeries.addView(tv)
+
+            val etPeso = EditText(this)
+            etPeso.hint = "Peso (kg)"
+            etPeso.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+            binding.linearLayoutSeries.addView(etPeso)
+
+            val etReps = EditText(this)
+            etReps.hint = "Repeticiones"
+            etReps.inputType = InputType.TYPE_CLASS_NUMBER
+            binding.linearLayoutSeries.addView(etReps)
+
+            seriesViews.add(Pair(etPeso, etReps))
+        }
+
+        Toast.makeText(
+            this,
+            "$numSeries series creadas. Completa los datos.",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun observeViewModelStatus() {
         viewModel.operacionExitosa.observe(this) { message ->
             if (message != null) {
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                 viewModel.clearOperationStatus()
-                setResult(RESULT_OK) // Señal de éxito para EjercicioActivity (para recargar)
+                setResult(RESULT_OK)
                 finish()
             }
         }
 
-        // Manejo de estado: Error
         viewModel.error.observe(this) { error ->
             if (error != null) {
-                Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Error: $error", Toast.LENGTH_LONG).show()
                 viewModel.clearOperationStatus()
             }
         }
     }
 
-    // FUNCIÓN PRINCIPAL: Recoge datos y llama al guardado en BD
     private fun guardarDatos() {
-        // 1. Recoger y validar datos
-        // 🔑 USAMOS LOS IDS SIN VERIFICACIÓN DE NULL
-        val nombre = binding.etNombre.text.toString().trim()
-        val repsStr = binding.etRepeticiones.text.toString().trim()
-        val pesoStr = binding.etPeso.text.toString().trim()
-        val dificultadStr = binding.etDificultad.text.toString().trim()
+        val selected = ejercicioSeleccionado
 
-        if (nombre.isBlank() || repsStr.isBlank()) {
-            Toast.makeText(this, "Por favor, rellena los campos obligatorios.", Toast.LENGTH_LONG).show()
+        if (selected == null) {
+            Toast.makeText(
+                this,
+                "Debe seleccionar un ejercicio del catálogo.",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
-        // 2. Conversión a tipos seguros (Int/Double)
-        val reps = repsStr.toIntOrNull() ?: 0
-        val peso = pesoStr.toDoubleOrNull() ?: 0.0
-        val dificultad = dificultadStr.toDoubleOrNull() ?: 1.0
-
-        if (reps <= 0) {
-            Toast.makeText(this, "Las repeticiones deben ser un valor positivo válido.", Toast.LENGTH_LONG).show()
+        if (seriesViews.isEmpty()) {
+            Toast.makeText(
+                this,
+                "Debe establecer al menos 1 serie.",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
-        // 3. Llamar al ViewModel para la inserción/actualización
+        // Recoger datos de las series
+        var totalReps = 0
+        var pesoMaximo = 0.0
+        var pesoPromedio = 0.0
+        var totalPeso = 0.0
+        val seriesIncompletas = mutableListOf<Int>()
+        var seriesValidas = 0
+
+        seriesViews.forEachIndexed { index, (pesoView, repsView) ->
+            val pesoText = pesoView.text.toString().trim()
+            val repsText = repsView.text.toString().trim()
+
+            Log.d("DetalleEjercicio", "Serie ${index + 1}: peso='$pesoText', reps='$repsText'")
+
+            if (pesoText.isEmpty() || repsText.isEmpty()) {
+                seriesIncompletas.add(index + 1)
+            } else {
+                val peso = pesoText.toDoubleOrNull()
+                val reps = repsText.toIntOrNull()
+
+                if (peso == null || reps == null || peso < 0 || reps < 0) {
+                    seriesIncompletas.add(index + 1)
+                } else {
+                    totalReps += reps
+                    totalPeso += peso
+                    seriesValidas++
+
+                    if (peso > pesoMaximo) {
+                        pesoMaximo = peso
+                    }
+
+                    Log.d("DetalleEjercicio", "Serie ${index + 1} válida: peso=$peso, reps=$reps")
+                }
+            }
+        }
+
+        // Validar que todas las series estén completas
+        if (seriesIncompletas.isNotEmpty()) {
+            Toast.makeText(
+                this,
+                "Complete las series: ${seriesIncompletas.joinToString(", ")}",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        if (totalReps <= 0) {
+            Toast.makeText(
+                this,
+                "Debe registrar al menos 1 repetición válida.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        // Calcular peso promedio
+        pesoPromedio = if (seriesValidas > 0) totalPeso / seriesValidas else 0.0
+
+        // 🔑 idDiaRutina SIEMPRE es válido aquí (fue verificado en onCreate)
+        val idDia = idDiaRutina!!
+
+        Log.d("DetalleEjercicio", "=== RESUMEN PARA GUARDAR ===")
+        Log.d("DetalleEjercicio", "Ejercicio: ${selected.nombre}")
+        Log.d("DetalleEjercicio", "ID Ejercicio (FK): ${selected.id_ejercicio}")
+        Log.d("DetalleEjercicio", "Total Reps: $totalReps")
+        Log.d("DetalleEjercicio", "Peso Máximo: $pesoMaximo")
+        Log.d("DetalleEjercicio", "Peso Promedio: $pesoPromedio")
+        Log.d("DetalleEjercicio", "Series Válidas: $seriesValidas")
+        Log.d("DetalleEjercicio", "ID Día: $idDia")
+
+        // Usar peso máximo para el registro (o promedio, según prefieras)
         viewModel.guardarEjercicio(
             idEjercicio = idEjercicioExistente,
-            idDiaRutina = idDiaRutina!!, // El ViewModel fallará si es null, pero la lógica lo exige
-            nombre = nombre,
-            reps = reps,
-            peso = peso,
-            dificultad = dificultad
+            idDiaRutina = idDia,
+            nombre = selected.nombre,
+            reps = totalReps,
+            peso = pesoMaximo, // Puedes cambiar a pesoPromedio si prefieres
+            dificultad = 1.0,
+            idFkEjercicio = selected.id_ejercicio
         )
     }
 }

@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ut2_app.adapters.RutinaAdapter
 import com.example.ut2_app.databinding.FragmentMiRutinaBinding
-import com.example.ut2_app.model.DiaSemanaUI // Modelo que usa el Adapter
 import com.example.ut2_app.util.VerticalSpaceItemDecoration
 import com.example.ut2_app.viewmodels.MiRutinaViewModel
 
@@ -19,8 +19,6 @@ class MiRutinaFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: MiRutinaViewModel by viewModels()
-
-    // 🔑 CORRECCIÓN: Declaración sin argumentos de tipo (sin <...>)
     private lateinit var rutinaAdapter: RutinaAdapter
 
     override fun onCreateView(
@@ -34,8 +32,15 @@ class MiRutinaFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Inicialización: Pasamos una lista vacía. El Adapter ahora debe aceptar List<DiaSemanaUI>
-        rutinaAdapter = RutinaAdapter(emptyList())
+        // 🔑 INICIALIZACIÓN: Pasamos el lifecycleOwner y el callback de creación
+        rutinaAdapter = RutinaAdapter(
+            listaDias = emptyList(),
+            lifecycleOwner = viewLifecycleOwner,
+            onCrearRutina = { nombreDia ->
+                // 🔑 Callback: Este código se ejecuta cuando se hace click en un día sin rutina
+                viewModel.crearRutinaDia(nombreDia)
+            }
+        )
 
         binding.recyclerViewRutinas.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -44,17 +49,33 @@ class MiRutinaFragment : Fragment() {
         }
 
         observeDiasRutina()
+        observeErrors()
     }
 
-    // 🔑 FUNCIÓN CORREGIDA: Observamos el LiveData 'diasSemana' del ViewModel
     private fun observeDiasRutina() {
-        // Observamos el LiveData que devuelve la lista combinada (Lunes-Domingo)
         viewModel.diasSemana.observe(viewLifecycleOwner) { listaDiasCombinada ->
-            // El Adapter recibe la lista de DiaSemanaUI
             rutinaAdapter.actualizarLista(listaDiasCombinada)
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            // Opcional: Mostrar un ProgressBar mientras carga
+            // binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
     }
 
+    private fun observeErrors() {
+        viewModel.error.observe(viewLifecycleOwner) { error ->
+            if (error != null) {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 🔑 Recargar al volver (para reflejar nuevos ejercicios añadidos)
+        viewModel.cargarRutinas()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

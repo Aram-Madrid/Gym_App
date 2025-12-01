@@ -21,58 +21,39 @@ class EjercicioActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEjercicioBinding
     private lateinit var adapter: EjercicioAdapter
 
-    // 🔑 1. OBTENER EL ID DEL DÍA (Ahora permite nulos y lo maneja en onCreate)
+    // 🔑 CORRECCIÓN 1: Obtener el ID como String? (puede ser null)
     private val idDiaRutina: String?
         get() = intent.getStringExtra("id_dia")
 
     private val nombreDia: String?
         get() = intent.getStringExtra("nombre_dia")
 
-    // 🔑 2. INICIALIZAR EL VIEWMODEL CON LA FACTORÍA (Pasamos el ID, que puede ser nulo)
+    // 🔑 CORRECCIÓN 2: Pasar null como null, NO como string "null"
     private val viewModel: EjercicioViewModel by viewModels {
-        EjercicioViewModelFactory(idDiaRutina.toString())
+        EjercicioViewModelFactory(idDiaRutina) // ✅ Pasamos el valor real (null o String)
     }
 
-    // 🔑 3. REGISTRO DEL LAUNCHER (Manejador de guardado)
+    // Launcher para el resultado de DetalleEjercicioActivity
     private val detalleEjercicioLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
-                val data: Intent? = result.data
-                val nuevoEjercicio = data?.getSerializableExtra("nuevo_ejercicio") as? Ejercicio
+                // Recargar la lista después de guardar un ejercicio
+                viewModel.cargarEjercicios()
 
-                nuevoEjercicio?.let { ejercicio ->
-                    lifecycleScope.launch {
-                        try {
-                            // Guardar en Supabase (el ViewModel gestiona el ID de la BD)
-                            viewModel.guardarEjercicio(ejercicio)
-
-                            // Recargar la lista (sin argumentos).
-                            viewModel.cargarEjercicios()
-
-                            Toast.makeText(
-                                this@EjercicioActivity,
-                                "Ejercicio guardado!",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } catch (e: Exception) {
-                            Toast.makeText(
-                                this@EjercicioActivity,
-                                "Error al guardar: ${e.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    }
-                }
+                Toast.makeText(
+                    this@EjercicioActivity,
+                    "Ejercicio guardado correctamente",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEjercicioBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Asumimos que el TextView se llama textViewTitulo
+        // Configurar título
         binding.textViewTitulo.text = "Rutina del ${nombreDia ?: "Día"}"
 
         // Configurar RecyclerView
@@ -80,40 +61,46 @@ class EjercicioActivity : AppCompatActivity() {
         binding.recyclerViewEjercicios.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewEjercicios.adapter = adapter
 
-        // 🔑 LÓGICA DE CARGA: Si el ID existe, carga los ejercicios. Si no, muestra vacío.
-        if (idDiaRutina != null) {
-            viewModel.cargarEjercicios()
-        } else {
-            // Modo Creación: Muestra la lista vacía, lista para añadir el primer elemento.
-            binding.recyclerViewEjercicios.visibility = View.VISIBLE
-            // Puedes mostrar un mensaje de "Añade tu primer ejercicio" si lo deseas.
-        }
-
+        // Observar ejercicios
         observeEjercicios()
 
         // Botón para agregar nuevo ejercicio
         binding.btnAgregarEjercicio.setOnClickListener {
-            val intent = Intent(this, DetalleEjercicioActivity::class.java).apply {
-                // PASAR EL ID DEL DÍA (Puede ser null si el usuario pulsa un día inactivo)
-                putExtra("ID_DIA_RUTINA", idDiaRutina)
-                putExtra("NOMBRE_DIA", nombreDia)
-            }
-            detalleEjercicioLauncher.launch(intent)
+            abrirDetalleEjercicio()
         }
 
         // Botón para volver a MiRutinaFragment
         binding.botonVueltaRutina.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("abrir_fragmento", "mi_rutina")
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)
+            volverAMiRutina()
         }
     }
 
     private fun observeEjercicios() {
         viewModel.listaEjercicios.observe(this) { nuevaLista ->
-            // El adapter actualizará la lista, ya sea con ejercicios o con lista vacía
-            (binding.recyclerViewEjercicios.adapter as EjercicioAdapter).actualizarLista(nuevaLista)
+            adapter.actualizarLista(nuevaLista)
+
+            // Mostrar mensaje si la lista está vacía
+            if (nuevaLista.isEmpty()) {
+                // Puedes mostrar un TextView con "No hay ejercicios aún"
+                // o simplemente dejar el RecyclerView vacío
+            }
         }
+    }
+
+    private fun abrirDetalleEjercicio() {
+        val intent = Intent(this, DetalleEjercicioActivity::class.java).apply {
+            // Pasamos el ID del día (puede ser null si es nueva rutina)
+            putExtra("ID_DIA_RUTINA", idDiaRutina)
+            putExtra("NOMBRE_DIA", nombreDia)
+        }
+        detalleEjercicioLauncher.launch(intent)
+    }
+
+    private fun volverAMiRutina() {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("abrir_fragmento", "mi_rutina")
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        startActivity(intent)
     }
 }

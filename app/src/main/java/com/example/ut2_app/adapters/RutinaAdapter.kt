@@ -7,51 +7,78 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ut2_app.activities.EjercicioActivity
 import com.example.ut2_app.databinding.ItemRutinaBinding
-import com.example.ut2_app.model.DiaSemanaUI // ⬅️ ¡IMPORTACIÓN CLAVE! Usamos el modelo combinado
-import android.graphics.Color // Para cambiar colores si es necesario
+import com.example.ut2_app.model.DiaSemanaUI
+import android.graphics.Color
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class RutinaAdapter(
-    // 🔑 1. SOLUCIÓN: El adaptador ahora acepta la lista combinada (DiaSemanaUI)
-    private var listaDias: List<DiaSemanaUI>
+    private var listaDias: List<DiaSemanaUI>,
+    private val lifecycleOwner: LifecycleOwner, // 🔑 Necesario para lanzar coroutines
+    private val onCrearRutina: suspend (String) -> String? // 🔑 Callback para crear rutina
 ) : RecyclerView.Adapter<RutinaAdapter.RutinaViewHolder>() {
 
     inner class RutinaViewHolder(val binding: ItemRutinaBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        // 🔑 2. SOLUCIÓN: bind ahora acepta el modelo DiaSemanaUI
         fun bind(dia: DiaSemanaUI) {
-
-            // El texto es el nombre fijo del día de la semana
+            // Mostrar el nombre del día
             binding.textViewDia.text = dia.nombreDia
 
-            // 🔑 Estilo: Resaltar los días que tienen una rutina activa
-            val colorFondo = if (dia.isActive) Color.parseColor("#4CAF50") else Color.LTGRAY
+            // 🔑 Estilo visual: Resaltar días activos
+            val colorFondo = if (dia.isActive) {
+                Color.parseColor("#4CAF50") // Verde para días con rutina
+            } else {
+                Color.parseColor("#BDBDBD") // Gris para días sin rutina
+            }
             binding.root.setBackgroundColor(colorFondo)
 
+            // 🔑 Click handler con creación automática de rutina
             binding.root.setOnClickListener {
                 val context = binding.root.context
 
-                // Obtenemos los IDs y nombres
-                val idDiaAEnviar = dia.idDiaRutina // ⬅️ Será NULL si el día está inactivo
-                val nombreDiaAEnviar = dia.nombreDia
+                lifecycleOwner.lifecycleScope.launch {
+                    try {
+                        // Obtener o crear el ID de la rutina del día
+                        val idDiaFinal = if (dia.idDiaRutina == null) {
+                            // 🔑 CREAR RUTINA AUTOMÁTICAMENTE
+                            Toast.makeText(
+                                context,
+                                "Creando rutina para ${dia.nombreDia}...",
+                                Toast.LENGTH_SHORT
+                            ).show()
 
-                // 🔑 CORRECCIÓN CLAVE: Eliminamos la comprobación 'isActive' y navegamos siempre.
-                // EjercicioActivity manejará el caso de id_dia nulo (Modo Creación).
+                            onCrearRutina(dia.nombreDia)
+                        } else {
+                            // Ya existe, usar el ID existente
+                            dia.idDiaRutina
+                        }
 
-                val intent = Intent(context, EjercicioActivity::class.java).apply {
-                    // Pasamos el ID del DÍA (puede ser null)
-                    putExtra("id_dia", idDiaAEnviar)
-                    putExtra("nombre_dia", nombreDiaAEnviar)
-                }
-                context.startActivity(intent)
+                        // Verificar que tenemos un ID válido
+                        if (idDiaFinal == null) {
+                            Toast.makeText(
+                                context,
+                                "Error al crear la rutina. Intenta de nuevo.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            return@launch
+                        }
 
-                // Opcional: Mostrar un Toast si el día no tiene ID (solo para feedback)
-                if (idDiaAEnviar == null) {
-                    Toast.makeText(
-                        context,
-                        "Creando rutina para el ${dia.nombreDia}...",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                        // Navegar a EjercicioActivity con el ID (nuevo o existente)
+                        val intent = Intent(context, EjercicioActivity::class.java).apply {
+                            putExtra("id_dia", idDiaFinal)
+                            putExtra("nombre_dia", dia.nombreDia)
+                        }
+                        context.startActivity(intent)
+
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            context,
+                            "Error: ${e.localizedMessage}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
         }
@@ -66,7 +93,6 @@ class RutinaAdapter(
         return RutinaViewHolder(binding)
     }
 
-    // 🔑 onBindViewHolder usa la lista del nuevo modelo
     override fun onBindViewHolder(holder: RutinaViewHolder, position: Int) {
         holder.bind(listaDias[position])
     }
@@ -74,9 +100,8 @@ class RutinaAdapter(
     override fun getItemCount(): Int = listaDias.size
 
     /**
-     * Permite al ViewModel actualizar los datos con la lista de 7 días.
+     * Actualiza la lista de días desde el ViewModel.
      */
-    // 🔑 4. actualizarLista acepta List<DiaSemanaUI>
     fun actualizarLista(nuevaLista: List<DiaSemanaUI>) {
         this.listaDias = nuevaLista
         notifyDataSetChanged()
