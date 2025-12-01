@@ -102,6 +102,16 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:auth-kt")
     implementation("io.ktor:ktor-client-android:3.3.3")
+    implementation("io.github.jan-tennert.supabase:storage-kt")
+
+    implementation("io.coil-kt:coil:2.6.0")
+
+    implementation("io.github.jan-tennert.supabase:realtime-kt")
+    implementation("io.ktor:ktor-client-okhttp:3.3.3")
+
+    implementation("io.ktor:ktor-client-okhttp:3.3.3")
+    implementation("io.ktor:ktor-client-websockets:3.3.3")
+
 
 
 }

@@ -47,6 +47,7 @@
                 />
 
             <EditText
+                android:id="@+id/editTextNombre"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="28dp"
