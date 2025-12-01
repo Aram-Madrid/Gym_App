@@ -14,6 +14,9 @@ import com.example.ut2_app.util.SupabaseClientProvider // Importación necesaria
 import io.github.jan.supabase.auth.auth // Importación necesaria
 import kotlinx.coroutines.launch // Importación necesaria
 
+
+
+
 class ConfiguracionActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityConfiguracionBinding

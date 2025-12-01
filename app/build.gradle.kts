@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.foundation)
 
     // Test
     testImplementation(libs.junit)
@@ -97,31 +98,9 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
 
-
-//    implementation("io.github.jan-tennert.supabase:bom:3.1.1")
-//    implementation("io.github.jan-tennert.supabase:auth-kt")
-//    // Core client
-//    implementation("io.github.jan-tennert.supabase:supabase-kt")
-//
-//    // Feature modules
-//    implementation("io.github.jan-tennert.supabase:postgrest-kt")
-//    implementation("io.github.jan-tennert.supabase:storage-kt")
-//
-//    // Ktor client and serialization (your existing versions look fine)
-//    implementation("io.ktor:ktor-client-core:2.3.12")
-//    implementation("io.ktor:ktor-client-android:2.3.12")
-//    implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
-//    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
-//    implementation("io.ktor:ktor-client-okhttp:3.0.3")
-//
-//    // Ensure compatible serialization library
-//    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-
     implementation(platform("io.github.jan-tennert.supabase:bom:3.2.6"))
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:auth-kt")
-
-
     implementation("io.ktor:ktor-client-android:3.3.3")
 
 

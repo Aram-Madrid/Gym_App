@@ -5,7 +5,6 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 
-
 object SupabaseClientProvider {
     val supabase = createSupabaseClient(
         supabaseUrl = BuildConfig.SUPABASE_URL,
@@ -13,9 +12,5 @@ object SupabaseClientProvider {
     ) {
         install(Auth)
         install(Postgrest)
-        //install other modules
     }
-
-
-
 }

@@ -7,10 +7,12 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -20,19 +22,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.example.ut2_app.activities.ConfiguracionActivity
 import com.example.ut2_app.databinding.FragmentHomeBinding
+import com.example.ut2_app.viewmodels.HomeViewModel
+import com.example.ut2_app.model.PuntosGrupoUI
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.polar.*
 import io.github.koalaplot.core.style.*
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.generateHueColorPalette
-import kotlin.random.Random
+
+// -----------------------------------------------------------
+// CLASE FRAGMENT
+// -----------------------------------------------------------
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+
+    // Inicializa el ViewModel
+    private val viewModel: HomeViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,7 +62,8 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.composeView.setContent {
-            GraficoRadar()
+            // Pasa el ViewModel al composable
+            GraficoRadar(viewModel = viewModel)
         }
     }
 
@@ -61,60 +73,73 @@ class HomeFragment : Fragment() {
     }
 }
 
+// -----------------------------------------------------------
+// FUNCIÓN COMPOSABLE (Gráfico de Radar)
+// -----------------------------------------------------------
+
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-fun GraficoRadar() {
-    val contextFondo = LocalContext.current
-    val typedValue = TypedValue()
-    contextFondo.theme.resolveAttribute(R.attr.colorAccent, typedValue, true)
-    val accentColor = Color(typedValue.data)
+fun GraficoRadar(viewModel: HomeViewModel) {
 
-    val categories = listOf("Pecho", "Brazos", "Core", "Espalda", "Piernas")
-    val seriesNames = listOf("")
+    val puntosData = viewModel.puntosRendimiento.collectAsState().value
 
-    val data: List<List<PolarPoint<Float, String>>> = buildList {
-        seriesNames.forEach { _ ->
-            add(categories.map { category ->
-                DefaultPolarPoint(Random.nextDouble(1.0, 4.0).toFloat(), category)
-            })
-        }
+    if (puntosData.isEmpty()) {
+        Text(
+            text = "Cargando datos de rendimiento...",
+            fontSize = 18.sp,
+            color = Color.Black
+        )
+        return
     }
 
-    val niveles = mapOf(
-        0 to "F",
-        1 to "C",
-        2 to "B",
-        3 to "A",
-        4 to "S"
+    // 1. Mapear y convertir datos (usando Double)
+    val categories = puntosData.map { it.grupo }
+    val maxPoints = puntosData.maxOfOrNull { it.maximo } ?: 5.0
+    val radialMax = maxPoints + 1.0
+
+    val data: List<List<PolarPoint<Float, String>>> = listOf(
+        puntosData.map { item ->
+            DefaultPolarPoint(item.valor.toFloat(), item.grupo)
+        }
     )
 
-    val palette = generateHueColorPalette(seriesNames.size)
+    val seriesColor = Color.Black // ⬅️ Usaremos Negro para el polígono de datos
+    val radialRange = (0..radialMax.toInt()).map { it.toFloat() }
+    val niveles = mapOf(
+        0 to "F",
+        (radialMax * 0.25).toInt() to "C",
+        (radialMax * 0.50).toInt() to "B",
+        (radialMax * 0.75).toInt() to "A",
+        radialMax.toInt() to "S"
+    )
 
+    // 2. Renderizado del gráfico
     ChartLayout(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            // Fondo EXTERNO Transparente (pero el XML fuerza blanco debajo)
+            .background(Color.Transparent)
     ) {
         PolarGraph(
-            radialAxisModel = rememberFloatRadialAxisModel((0..4).map { it.toFloat() }),
+            radialAxisModel = rememberFloatRadialAxisModel(radialRange),
             angularAxisModel = rememberCategoryAngularAxisModel(categories),
 
-            // --- Etiquetas radiales (letras S, A, B, C, F) ---
+            // --- Etiquetas NEGRAS (Alto Contraste) ---
             radialAxisLabels = { valor ->
                 Text(
                     text = niveles[valor.toInt()] ?: "",
+                    color = Color.Black, // ⬅️ NEGRO PURO
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     fontStyle = FontStyle.Italic,
                     modifier = Modifier.padding(start = 11.dp)
                 )
             },
-
-            // --- Etiquetas angulares (categorías) ---
             angularAxisLabels = { categoria ->
                 Text(
                     text = categoria,
-                    color = Color(0xFF0099CC),
+                    color = Color.Blue, // ⬅️ NEGRO PURO
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -122,16 +147,32 @@ fun GraficoRadar() {
 
             polarGraphProperties = PolarGraphDefaults.PolarGraphPropertyDefaults().copy(
                 radialGridType = RadialGridType.CIRCLES,
-                angularAxisGridLineStyle = LineStyle(SolidColor(Color.Black), 4.dp, alpha = 0.3f),
-                radialAxisGridLineStyle = LineStyle(SolidColor(Color.Black), 4.dp, alpha = 0.3f),
-                background = AreaStyle(SolidColor(Color.Unspecified))
+
+                // 🔑 SOLUCIÓN: Líneas GRISES (Radial Grid Lines - Circulares)
+                radialAxisGridLineStyle = LineStyle(
+                    SolidColor(Color.LightGray), // ⬅️ Forzamos el color Gris
+                    strokeWidth = 1.dp,
+                    alpha = 0.8f
+                ),
+                // Líneas GRISES (Angular Grid Lines - Radiales)
+                angularAxisGridLineStyle = LineStyle(
+                    SolidColor(Color.Black), // ⬅️ Forzamos el color Gris
+                    strokeWidth = 1.dp,
+                    alpha = 0.8f
+                ),
+
+                // Fondo INTERNO Transparente
+                background = AreaStyle(SolidColor(Color.Transparent))
             )
         ) {
-            data.forEachIndexed { index, seriesData ->
+            // Dibuja el polígono de datos
+            data.forEach { seriesData ->
                 PolarPlotSeries(
                     seriesData,
-                    lineStyle = LineStyle(SolidColor(palette[index]), strokeWidth = 2.dp),
-                    areaStyle = AreaStyle(SolidColor(palette[index]), alpha = 0.3f)
+                    // Línea del pentágono en negro
+                    lineStyle = LineStyle(SolidColor(Color.Black), strokeWidth = 2.dp),
+                    // Área totalmente transparente
+                    areaStyle = AreaStyle(SolidColor(Color.Transparent), alpha = 0.0f)
                 )
             }
         }

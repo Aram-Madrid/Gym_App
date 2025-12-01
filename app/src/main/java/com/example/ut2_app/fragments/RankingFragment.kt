@@ -1,155 +1,68 @@
 package com.example.ut2_app.fragments
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ut2_app.adapters.RankingAdapter
-import com.example.ut2_app.adapters.Usuario
 import com.example.ut2_app.databinding.FragmentRankingBinding
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldPath
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.ut2_app.viewmodels.RankingViewModel
 
 class RankingFragment : Fragment() {
 
     private var _binding: FragmentRankingBinding? = null
+    // Propiedad calculada para acceder al binding de forma segura
     private val binding get() = _binding!!
 
-    private val db = FirebaseFirestore.getInstance()
+    // 1. Inicializar el ViewModel para cargar los datos del ranking
+    private val viewModel: RankingViewModel by viewModels()
+
+    private lateinit var rankingAdapter: RankingAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Inicializar View Binding
         _binding = FragmentRankingBinding.inflate(inflater, container, false)
-
-        binding.btnAgregarAmigo.setOnClickListener {
-            mostrarDialogoAgregarAmigo()
-        }
-
-        // RecyclerView
-        binding.recyclerRanking.layoutManager = LinearLayoutManager(requireContext())
-
-        cargarRankingAmigos()
-
         return binding.root
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun cargarRankingAmigos() {
-        val uidActual = FirebaseAuth.getInstance().currentUser?.uid
-        if (uidActual == null) {
-            Toast.makeText(requireContext(), "Error: usuario no autenticado", Toast.LENGTH_SHORT).show()
-            return
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // 2. Inicializar el Adapter con una lista vacía (el ViewModel la llenará)
+        rankingAdapter = RankingAdapter(requireContext(), emptyList())
+
+        binding.recyclerRanking.apply { // ⬅️ CORRECCIÓN: Usando el ID real del XML
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = rankingAdapter
         }
 
-        val usuarios = mutableListOf<Usuario>()
-        val adapter = RankingAdapter(requireContext(), usuarios)
-        binding.recyclerRanking.adapter = adapter
+        // 3. Observar los datos del ViewModel
+        observeRanking()
 
-        db.collection("usuarios").document(uidActual)
-            .collection("amigos")
-            .get()
-            .addOnSuccessListener { amigosDocs ->
-                usuarios.clear()
-                val friendIds = amigosDocs.mapNotNull { it.getString("amigoId") }.toMutableList()
-                friendIds.add(uidActual) // incluir al usuario actual
-
-                if (friendIds.isEmpty()) {
-                    adapter.notifyDataSetChanged()
-                    return@addOnSuccessListener
-                }
-
-                db.collection("usuarios")
-                    .whereIn(FieldPath.documentId(), friendIds)
-                    .get()
-                    .addOnSuccessListener { result ->
-                        for (doc in result) {
-                            val id = doc.id
-                            val nombre = doc.getString("nombre") ?: "Sin nombre"
-                            val puntuacion = doc.getLong("elo")?.toInt() ?: 0
-                            val fotoUrl = doc.getString("fotoUrl")
-                            val esActual = id == uidActual
-                            usuarios.add(Usuario(nombre, puntuacion, fotoUrl, 0, esActual))
-                        }
-
-                        usuarios.sortByDescending { it.puntuacion }
-                        usuarios.forEachIndexed { index, usuario -> usuario.posicion = index + 1 }
-
-                        adapter.notifyDataSetChanged()
-                    }
-            }
+        // 4. (Opcional) Forzar la carga inicial si el ViewModel no la tiene en init{}
+        // viewModel.cargarRanking()
     }
 
-    private fun mostrarDialogoAgregarAmigo() {
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("Agregar amigo")
-
-        val input = EditText(requireContext())
-        input.hint = "Correo del amigo"
-        builder.setView(input)
-
-        builder.setPositiveButton("Agregar") { dialog, _ ->
-            val texto = input.text.toString().trim()
-            if (texto.isNotEmpty()) {
-                agregarAmigo(texto)
-            } else {
-                Toast.makeText(requireContext(), "Introduce un correo", Toast.LENGTH_SHORT).show()
-            }
-            dialog.dismiss()
+    private fun observeRanking() {
+        // Observa la lista de usuarios (UsuarioRankingDB)
+        viewModel.usuariosRanking.observe(viewLifecycleOwner) { listaUsuarios ->
+            // Actualiza la lista en el Adapter
+            rankingAdapter.actualizarLista(listaUsuarios)
         }
 
-        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-        builder.show()
-    }
-
-    private fun agregarAmigo(emailAmigo: String) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-
-        db.collection("usuarios")
-            .whereEqualTo("email", emailAmigo)
-            .get()
-            .addOnSuccessListener { result ->
-                if (result.isEmpty) {
-                    Toast.makeText(requireContext(), "No existe un usuario con ese correo", Toast.LENGTH_SHORT).show()
-                    return@addOnSuccessListener
-                }
-
-                val amigoDoc = result.documents.first()
-                val amigoId = amigoDoc.id
-                val amigoNombre = amigoDoc.getString("nombre") ?: "Desconocido"
-
-                if (amigoId == userId) {
-                    Toast.makeText(requireContext(), "No puedes agregarte a ti mismo", Toast.LENGTH_SHORT).show()
-                    return@addOnSuccessListener
-                }
-
-                val amigoData = hashMapOf(
-                    "amigoId" to amigoId,
-                    "nombre" to amigoNombre
-                )
-
-                db.collection("usuarios").document(userId)
-                    .collection("amigos")
-                    .document(amigoId)
-                    .set(amigoData)
-                    .addOnSuccessListener {
-                        Toast.makeText(requireContext(), "$amigoNombre añadido a tus amigos", Toast.LENGTH_SHORT).show()
-                        cargarRankingAmigos()
-                    }
-            }
+        // Puedes observar aquí el estado de la barra de experiencia si lo implementas en el ViewModel
+        // viewModel.barraExperiencia.observe(viewLifecycleOwner) { porcentaje -> ... }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Limpiar el binding para evitar fugas de memoria
         _binding = null
     }
 }
-

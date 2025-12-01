@@ -11,21 +11,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.ut2_app.R
-
-data class Usuario(
-    val nombre: String,
-    val puntuacion: Int,
-    val fotoUrl: String? = null,
-    var posicion: Int = 0,
-    val esActual: Boolean = false
-)
+import com.example.ut2_app.model.UsuarioRankingDB // ⬅️ Nuevo Modelo
 
 class RankingAdapter(
     private val context: Context,
-    private val usuarios: List<Usuario>
+    // 🔑 Aceptar la lista del nuevo modelo
+    private var usuarios: List<UsuarioRankingDB>
 ) : RecyclerView.Adapter<RankingAdapter.UsuarioViewHolder>() {
 
-    // ViewHolder
+    // ... (UsuarioViewHolder se mantiene igual, ya que usa los IDs del layout)
+
     class UsuarioViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtPosicion: TextView = view.findViewById(R.id.posicion)
         val txtNombre: TextView = view.findViewById(R.id.nombre)
@@ -34,6 +29,7 @@ class RankingAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UsuarioViewHolder {
+        // Asegúrate de que R.layout.item_ranking existe
         val view = LayoutInflater.from(context).inflate(R.layout.item_ranking, parent, false)
         return UsuarioViewHolder(view)
     }
@@ -43,11 +39,13 @@ class RankingAdapter(
     override fun onBindViewHolder(holder: UsuarioViewHolder, position: Int) {
         val usuario = usuarios[position]
 
+        // 🔑 Los campos ahora vienen del modelo UsuarioRankingDB
         holder.txtPosicion.text = usuario.posicion.toString()
         holder.txtNombre.text = usuario.nombre
-        holder.txtPuntuacion.text = "${usuario.puntuacion} pts"
+        // Usamos elo que es Short (Integer)
+        holder.txtPuntuacion.text = "${usuario.elo} ELO"
 
-        // Carga la foto
+        // Carga la foto (usando fotoUrl que mapea fotoperfilurl)
         if (!usuario.fotoUrl.isNullOrEmpty()) {
             Glide.with(context)
                 .load(usuario.fotoUrl)
@@ -57,7 +55,7 @@ class RankingAdapter(
             holder.imgFoto.setImageResource(R.drawable.place_holder)
         }
 
-        // Resaltar usuario actual
+        // Resaltar usuario actual (usa la propiedad 'esActual' ya asignada en el ViewModel)
         val typedValue = TypedValue()
         context.theme.resolveAttribute(android.R.attr.colorAccent, typedValue, true)
         val colorAcento = typedValue.data
@@ -66,6 +64,11 @@ class RankingAdapter(
             if (usuario.esActual) colorAcento
             else Color.TRANSPARENT
         )
+    }
 
+    // 🔑 Método para actualizar la lista desde el ViewModel
+    fun actualizarLista(nuevaLista: List<UsuarioRankingDB>) {
+        this.usuarios = nuevaLista
+        notifyDataSetChanged()
     }
 }

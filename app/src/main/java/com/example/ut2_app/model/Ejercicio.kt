@@ -2,13 +2,14 @@ package com.example.ut2_app.model
 
 import java.io.Serializable
 
-data class Serie(
-    var peso: Float = 0f,
-    var repeticiones: Int = 0
-) : Serializable
-
 data class Ejercicio(
+    // Propiedades de la DB necesarias para la UI
+    val idDato: String,
     val nombre: String,
-    var seleccionado: Boolean = false,
-    val series: MutableList<Serie> = mutableListOf()
-) : Serializable
+    val reps: Int,
+    val peso: Double,
+    val dificultad: Double,
+
+    // Lista de series para el detalle del Adapter
+    val series: List<Serie> = emptyList()
+): Serializable
