@@ -14,7 +14,8 @@ import com.example.ut2_app.util.PTMCalculator
 import com.example.ut2_app.util.SupabaseClientProvider
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns.Companion.list
-// 🔑 IMPORTANTE: Nuevas importaciones para solucionar el error de serialización
+import io.github.jan.supabase.postgrest.rpc
+// 🔑 IMPORTACIONES PARA SERIALIZACIÓN SEGURA (JSON)
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.coroutines.launch
@@ -22,16 +23,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
-/**
- * ViewModel para DetalleEjercicioActivity.
- *
- * Al guardar un ejercicio, actualiza:
- * 1. rutina_dia_datos - datos del ejercicio
- * 2. series - series individuales
- * 3. usuarios.elo - ELO general (para ranking)
- * 4. usuario_puntos_grupo - puntos por grupo muscular (para gráfico radar)
- * 5. historial_elo - registro del cambio
- */
 class DetalleEjercicioViewModel : ViewModel() {
 
     private val _catalogoEjercicios = MutableLiveData<List<EjercicioDetalle>>(emptyList())
@@ -62,10 +53,8 @@ class DetalleEjercicioViewModel : ViewModel() {
                     .select(list("id_ejercicio, nombre, grupo_muscular, dificultad"))
                     .decodeList<EjercicioDetalle>()
                 _catalogoEjercicios.postValue(result)
-                Log.d("DetalleEjercicioVM", "Catálogo cargado: ${result.size} ejercicios")
             } catch (e: Exception) {
-                Log.e("DetalleEjercicioVM", "Error cargando catálogo: ${e.message}", e)
-                _error.postValue("No se pudo cargar el catálogo de ejercicios")
+                _error.postValue("No se pudo cargar el catálogo")
             } finally {
                 _isLoading.postValue(false)
             }
@@ -84,7 +73,6 @@ class DetalleEjercicioViewModel : ViewModel() {
                     .decodeSingleOrNull<Ejercicio>()
                 _ejercicio.postValue(result)
             } catch (e: Exception) {
-                Log.e("DetalleEjercicioVM", "Error cargando ejercicio: ${e.message}", e)
                 _error.postValue("Error al cargar el ejercicio")
             } finally {
                 _isLoading.postValue(false)
@@ -93,7 +81,7 @@ class DetalleEjercicioViewModel : ViewModel() {
     }
 
     /**
-     * Guarda el ejercicio y actualiza todos los sistemas de puntuación.
+     * Guarda el ejercicio comparando con el historial.
      */
     fun guardarEjercicioConSeries(
         idEjercicio: String?,
@@ -104,13 +92,8 @@ class DetalleEjercicioViewModel : ViewModel() {
         idFkEjercicio: String,
         grupoMuscular: String? = null
     ) {
-        if (nombre.isBlank()) {
-            _error.value = "El nombre es obligatorio."
-            return
-        }
-
-        if (seriesData.isEmpty()) {
-            _error.value = "Debe registrar al menos 1 serie."
+        if (nombre.isBlank() || seriesData.isEmpty()) {
+            _error.value = "Datos incompletos"
             return
         }
 
@@ -120,84 +103,80 @@ class DetalleEjercicioViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val postgrestClient = SupabaseClientProvider.supabase.postgrest
+                val currentUserId = AuthManager.getCurrentUserId() ?: return@launch
 
-                val isNuevo = idEjercicio.isNullOrBlank()
-                val idDatoFinal = idEjercicio ?: UUID.randomUUID().toString()
-
-                // Obtener datos del catálogo si no se proporcionaron
-                val ejercicioCatalogo = obtenerEjercicioCatalogo(idFkEjercicio)
-                val grupoMuscularFinal = grupoMuscular
-                    ?: ejercicioCatalogo?.grupoMuscular
-                    ?: "Otro"
-                val dificultadFinal = ejercicioCatalogo?.dificultad ?: dificultad
-
-                // Calcular totales
-                val totalReps = seriesData.sumOf { it.second }
-                val pesoMaximo = seriesData.maxOfOrNull { it.first } ?: 0.0
-
-                // Calcular PTM
-                val ptm = PTMCalculator.calcularPTMConSeries(seriesData, dificultadFinal)
-
-                // Obtener usuario actual
-                val currentUserId = AuthManager.getCurrentUserId()
-                if (currentUserId == null) {
-                    _error.postValue("No hay sesión activa")
-                    return@launch
+                // 1. OBTENER HISTORIAL (Semana anterior)
+                // Llamada a la función RPC SQL que creamos para buscar el último peso
+                val ptmAnterior: Double = try {
+                    postgrestClient.rpc(
+                        "obtener_ultimo_ptm_ejercicio",
+                        mapOf(
+                            "p_id_usuario" to currentUserId,
+                            "p_id_ejercicio" to idFkEjercicio
+                        )
+                    ).decodeAs<Double>()
+                } catch (e: Exception) {
+                    Log.w("DetalleVM", "Sin historial previo o error RPC: ${e.message}")
+                    0.0 // Es la primera vez
                 }
 
+                // 2. CÁLCULOS ACTUALES
+                val ptmActual = PTMCalculator.calcularPTMConSeries(seriesData, dificultad)
                 val usuarioActual = AuthManager.getCurrentUserData()
                 val eloActualUsuario = usuarioActual?.elo ?: 1000
 
-                // Calcular cambio de ELO
-                val cambioELO = PTMCalculator.calcularCambioELO(ptm, eloActualUsuario)
+                // 3. COMPARACIÓN PROGRESIVA
+                // Usamos la nueva función que compara Hoy vs Anterior
+                val cambioELO = PTMCalculator.calcularCambioEloProgresivo(
+                    ptmActual = ptmActual,
+                    ptmAnterior = ptmAnterior,
+                    eloActual = eloActualUsuario
+                )
+
                 val nuevoELO = PTMCalculator.aplicarCambioELO(eloActualUsuario, cambioELO)
+                val nuevoRango = PTMCalculator.obtenerRango(nuevoELO)
 
-                // Calcular puntos para grupo muscular
-                val puntosGrupoMuscular = ptm * dificultadFinal
+                // PUNTOS GRUPO MUSCULAR (RADAR):
+                // Según tu petición: "si ha sido igual o menor debera mantenerse"
+                // Solo sumamos puntos al radar si hay MEJORA (cambioELO > 0) o es la primera vez.
+                val puntosGrupoMuscular = if (cambioELO > 0 || ptmAnterior == 0.0) {
+                    ptmActual * dificultad
+                } else {
+                    0.0 // Mantenemos (no sumamos puntos extra por no mejorar)
+                }
 
-                Log.d("DetalleEjercicioVM", "════════════════════════════════════════")
-                Log.d("DetalleEjercicioVM", "GUARDANDO EJERCICIO")
-                Log.d("DetalleEjercicioVM", "────────────────────────────────────────")
-                Log.d("DetalleEjercicioVM", "Nombre: $nombre")
-                Log.d("DetalleEjercicioVM", "Grupo Muscular: $grupoMuscularFinal")
-                Log.d("DetalleEjercicioVM", "Dificultad: $dificultadFinal")
-                Log.d("DetalleEjercicioVM", "Series: ${seriesData.size}")
-                Log.d("DetalleEjercicioVM", "PTM: $ptm")
-                Log.d("DetalleEjercicioVM", "ELO: $eloActualUsuario → $nuevoELO (${if (cambioELO >= 0) "+$cambioELO" else cambioELO})")
-                Log.d("DetalleEjercicioVM", "Puntos $grupoMuscularFinal: +$puntosGrupoMuscular")
-                Log.d("DetalleEjercicioVM", "════════════════════════════════════════")
+                Log.d("DetalleVM", "Historial: $ptmAnterior | Hoy: $ptmActual | Cambio: $cambioELO")
 
-                // ═══════════════════════════════════════════════════════════
-                // 1. GUARDAR EJERCICIO EN rutina_dia_datos
-                // ═══════════════════════════════════════════════════════════
+                // 4. PREPARAR DATOS BASE DE DATOS
+                val isNuevo = idEjercicio.isNullOrBlank()
+                val idDatoFinal = idEjercicio ?: UUID.randomUUID().toString()
+                val totalReps = seriesData.sumOf { it.second }
+                val pesoMaximo = seriesData.maxOfOrNull { it.first } ?: 0.0
+
+                // A. Insertar/Actualizar el Ejercicio en rutina_dia_datos
                 val datoParaInsertar = RutinaDiaDatoInsert(
                     id_dato = idDatoFinal,
                     routine_day_id = idDiaRutina,
                     id_ejercicio = idFkEjercicio,
                     reps = totalReps,
                     peso = pesoMaximo,
-                    dificultad = dificultadFinal,
-                    ptm = ptm,
+                    dificultad = dificultad,
+                    ptm = ptmActual,
                     elo = nuevoELO.toDouble()
                 )
 
                 if (isNuevo) {
                     postgrestClient["rutina_dia_datos"].insert(datoParaInsertar)
                 } else {
-                    postgrestClient["rutina_dia_datos"]
-                        .update(datoParaInsertar) {
-                            filter { eq("id_dato", idDatoFinal) }
-                        }
-                    postgrestClient["series"]
-                        .delete {
-                            filter { eq("id_dato", idDatoFinal) }
-                        }
+                    postgrestClient["rutina_dia_datos"].update(datoParaInsertar) {
+                        filter { eq("id_dato", idDatoFinal) }
+                    }
+                    postgrestClient["series"].delete {
+                        filter { eq("id_dato", idDatoFinal) }
+                    }
                 }
-                Log.d("DetalleEjercicioVM", "✅ Ejercicio guardado")
 
-                // ═══════════════════════════════════════════════════════════
-                // 2. GUARDAR SERIES
-                // ═══════════════════════════════════════════════════════════
+                // B. Insertar Series
                 seriesData.forEachIndexed { index, (peso, reps) ->
                     val serieInsert = SerieInsert(
                         id_serie = UUID.randomUUID().toString(),
@@ -208,59 +187,45 @@ class DetalleEjercicioViewModel : ViewModel() {
                     )
                     postgrestClient["series"].insert(serieInsert)
                 }
-                Log.d("DetalleEjercicioVM", "✅ ${seriesData.size} series guardadas")
 
-                // ═══════════════════════════════════════════════════════════
-                // 3. ACTUALIZAR ELO DEL USUARIO (RANKING) - CORREGIDO
-                // ═══════════════════════════════════════════════════════════
-                val nuevoRango = PTMCalculator.obtenerRango(nuevoELO)
-
-                // 🔑 CORRECCIÓN: Usar buildJsonObject en lugar de mapOf para evitar errores de serialización "Any"
+                // C. Actualizar Usuario (CON FIX SERIALIZACIÓN)
                 val updateData = buildJsonObject {
                     put("elo", nuevoELO)
                     put("rango", nuevoRango)
-                    put("ultimo_puntaje", ptm)
+                    put("ultimo_puntaje", ptmActual)
+                }
+                postgrestClient["usuarios"].update(updateData) {
+                    filter { eq("id", currentUserId) }
                 }
 
-                postgrestClient["usuarios"]
-                    .update(updateData) {
-                        filter { eq("id", currentUserId) }
-                    }
-                Log.d("DetalleEjercicioVM", "✅ ELO actualizado: $nuevoELO ($nuevoRango)")
+                // D. Actualizar Gráfico Radar (Solo si hubo mejora)
+                if (puntosGrupoMuscular > 0) {
+                    actualizarPuntosGrupoMuscular(currentUserId, grupoMuscular ?: "Otro", puntosGrupoMuscular)
+                }
 
-                // ═══════════════════════════════════════════════════════════
-                // 4. ACTUALIZAR PUNTOS POR GRUPO MUSCULAR (GRÁFICO RADAR)
-                // ═══════════════════════════════════════════════════════════
-                actualizarPuntosGrupoMuscular(currentUserId, grupoMuscularFinal, puntosGrupoMuscular)
-
-                // ═══════════════════════════════════════════════════════════
-                // 5. GUARDAR HISTORIAL DE ELO
-                // ═══════════════════════════════════════════════════════════
+                // E. Guardar en Historial
                 if (cambioELO != 0) {
-                    try {
-                        val historialInsert = HistorialEloInsert(
-                            id = UUID.randomUUID().toString(),
-                            id_usuario = currentUserId,
-                            elo_anterior = eloActualUsuario.toDouble(),
-                            elo_nuevo = nuevoELO.toDouble(),
-                            cambio = cambioELO.toDouble(),
-                            razon = "Ejercicio: $nombre",
-                            id_dato = idDatoFinal
-                        )
-                        postgrestClient["historial_elo"].insert(historialInsert)
-                        Log.d("DetalleEjercicioVM", "✅ Historial guardado")
-                    } catch (e: Exception) {
-                        Log.e("DetalleEjercicioVM", "⚠️ Error guardando historial: ${e.message}")
-                    }
+                    val razonTexto = if(ptmAnterior == 0.0) "Nuevo Ejercicio"
+                    else if(cambioELO > 0) "Mejora vs semana pasada"
+                    else "Rendimiento inferior"
+
+                    val historialInsert = HistorialEloInsert(
+                        id = UUID.randomUUID().toString(),
+                        id_usuario = currentUserId,
+                        elo_anterior = eloActualUsuario.toDouble(),
+                        elo_nuevo = nuevoELO.toDouble(),
+                        cambio = cambioELO.toDouble(),
+                        razon = razonTexto,
+                        id_dato = idDatoFinal
+                    )
+                    postgrestClient["historial_elo"].insert(historialInsert)
                 }
 
-                _operacionExitosa.postValue(
-                    "¡Guardado! ELO ${if (cambioELO >= 0) "+$cambioELO" else cambioELO} | $grupoMuscularFinal +${puntosGrupoMuscular.toInt()} pts"
-                )
+                _operacionExitosa.postValue("Guardado. ELO: $nuevoELO (${if(cambioELO>=0) "+" else ""}$cambioELO)")
 
             } catch (e: Exception) {
-                Log.e("DetalleEjercicioVM", "❌ Error al guardar: ${e.message}", e)
-                _error.postValue("Error al guardar: ${e.localizedMessage ?: e.message}")
+                Log.e("DetalleVM", "Error crítico: ${e.message}", e)
+                _error.postValue("Error: ${e.localizedMessage}")
             } finally {
                 _isLoading.postValue(false)
             }
@@ -276,20 +241,24 @@ class DetalleEjercicioViewModel : ViewModel() {
                 }
                 .decodeSingleOrNull<EjercicioCatalogoData>()
         } catch (e: Exception) {
-            Log.e("DetalleEjercicioVM", "Error obteniendo catálogo: ${e.message}")
             null
         }
     }
 
     private suspend fun actualizarPuntosGrupoMuscular(
         userId: String,
-        grupoMuscular: String,
+        grupoMuscularInput: String,
         puntosNuevos: Double
     ) {
         try {
+            // 1. Normalizar nombre (Ej: "pecho " -> "Pecho")
+            val grupoMuscular = grupoMuscularInput.trim()
+                .lowercase()
+                .replaceFirstChar { it.uppercase() }
+
             val postgrestClient = SupabaseClientProvider.supabase.postgrest
 
-            // Verificar si existe el registro
+            // 2. Buscar si ya existe registro para ese grupo normalizado
             val registroExistente = postgrestClient["usuario_puntos_grupo"]
                 .select {
                     filter {
@@ -300,10 +269,9 @@ class DetalleEjercicioViewModel : ViewModel() {
                 .decodeSingleOrNull<PuntosGrupoExistente>()
 
             if (registroExistente != null) {
-                // Actualizar: sumar puntos
+                // ACTUALIZAR (Sumar)
                 val nuevoTotal = registroExistente.puntosAcumulados + puntosNuevos
 
-                // 🔑 CORRECCIÓN: Usar buildJsonObject también aquí para seguridad
                 val updateData = buildJsonObject {
                     put("puntos_acumulados", nuevoTotal)
                 }
@@ -315,20 +283,19 @@ class DetalleEjercicioViewModel : ViewModel() {
                             eq("grupo", grupoMuscular)
                         }
                     }
-                Log.d("DetalleEjercicioVM", "✅ $grupoMuscular: ${registroExistente.puntosAcumulados} + $puntosNuevos = $nuevoTotal")
+                Log.d("DetalleVM", "Puntos actualizados para $grupoMuscular: $nuevoTotal")
             } else {
-                // Insertar nuevo registro
+                // INSERTAR (Nuevo)
                 val nuevoRegistro = PuntosGrupoInsert(
                     id_usuario = userId,
                     grupo = grupoMuscular,
                     puntos_acumulados = puntosNuevos
                 )
                 postgrestClient["usuario_puntos_grupo"].insert(nuevoRegistro)
-                Log.d("DetalleEjercicioVM", "✅ $grupoMuscular: nuevo registro con $puntosNuevos pts")
+                Log.d("DetalleVM", "Primer registro para $grupoMuscular: $puntosNuevos")
             }
-
         } catch (e: Exception) {
-            Log.e("DetalleEjercicioVM", "⚠️ Error actualizando puntos grupo: ${e.message}", e)
+            Log.e("DetalleVM", "Error crítico actualizando puntos grupo: ${e.message}", e)
         }
     }
 

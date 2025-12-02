@@ -8,7 +8,11 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.ut2_app.R
+import com.example.ut2_app.util.SupabaseClientProvider
+import io.github.jan.supabase.auth.auth
+import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
 
@@ -24,11 +28,29 @@ class SplashActivity : AppCompatActivity() {
         logo.startAnimation(fadeZoom)
         title.startAnimation(fadeZoom)
 
-        // Esperar 2 segundos y abrir LoginActivity
+        // Esperar 2 segundos y comprobar la sesión
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, LoginActivity::class.java) // Cambia a MainActivity si quieres
-            startActivity(intent)
-            finish()
+            checkSessionAndNavigate()
         }, 2000)
+    }
+
+    private fun checkSessionAndNavigate() {
+        lifecycleScope.launch {
+            // 🔑 LÓGICA DE SESIÓN PERSISTENTE
+            // Comprobamos si Supabase tiene un usuario guardado en local
+            val usuarioActual = SupabaseClientProvider.supabase.auth.currentUserOrNull()
+
+            if (usuarioActual != null) {
+                // Si hay usuario, vamos directo al Home
+                val intent = Intent(this@SplashActivity, MainActivity::class.java)
+                startActivity(intent)
+            } else {
+                // Si no hay usuario, vamos al Login
+                val intent = Intent(this@SplashActivity, LoginActivity::class.java)
+                startActivity(intent)
+            }
+            // Cerramos el Splash para que no se pueda volver atrás
+            finish()
+        }
     }
 }
