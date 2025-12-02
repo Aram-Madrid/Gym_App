@@ -5,11 +5,11 @@ import kotlinx.serialization.SerialName
 
 @Serializable
 data class UsuarioRankingDB(
-    val id: String, // UUID
+    val id: String,
     val nombre: String,
 
     @SerialName("elo")
-    val elo: Short, // Mapea smallint
+    val elo: Short,
 
     @SerialName("rango")
     val rango: String? = "Cobre",
@@ -17,7 +17,7 @@ data class UsuarioRankingDB(
     @SerialName("fotoperfilurl")
     val fotoUrl: String? = null,
 
-    // Propiedades de UI (no vienen de BD)
+
     val esActual: Boolean = false,
     var posicion: Int = 0
 )

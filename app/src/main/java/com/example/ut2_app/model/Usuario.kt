@@ -13,5 +13,5 @@ data class Usuario(
     val elo: Int = 0,
     val rango: String = "Bronze",
     @SerialName("fotoperfilurl")
-    val fotoPerfilUrl: String? = null  // 🔑 Cambiado a nullable y con @SerialName correcto
+    val fotoPerfilUrl: String? = null
 )

@@ -14,7 +14,6 @@ object SupabaseClientProvider {
         supabaseUrl = BuildConfig.SUPABASE_URL,
         supabaseKey = BuildConfig.SUPABASE_ANON_KEY
     ) {
-        // CRÍTICO: Crear instancia de OkHttp para soporte de WebSockets
         httpEngine = OkHttp.create {}
 
         install(Auth)

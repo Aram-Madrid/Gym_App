@@ -35,7 +35,6 @@ class MiRutinaFragment : Fragment() {
         rutinaAdapter = RutinaAdapter(
             listaItems = emptyList(),
             lifecycleOwner = viewLifecycleOwner,
-            // 🔑 Callback recibe nombreDia Y fechaObjetivo
             onCrearRutina = { nombreDia, fechaObjetivo ->
                 viewModel.crearRutinaDia(nombreDia, fechaObjetivo)
             }

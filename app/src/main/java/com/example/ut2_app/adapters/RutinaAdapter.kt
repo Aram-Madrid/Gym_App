@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 class RutinaAdapter(
     private var listaItems: List<RutinaDisplayItem>,
     private val lifecycleOwner: LifecycleOwner,
-    // 🔑 CAMBIO: El callback ahora recibe (NombreDia, FechaObjetivo)
     private val onCrearRutina: suspend (String, String) -> String?
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -58,7 +57,6 @@ class RutinaAdapter(
                     try {
                         val idDiaFinal = if (dia.idDiaRutina == null) {
                             Toast.makeText(context, "Creando rutina para ${dia.fechaObjetivo}...", Toast.LENGTH_SHORT).show()
-                            // 🔑 Enviamos la fecha específica
                             onCrearRutina(dia.nombreDia, dia.fechaObjetivo)
                         } else {
                             dia.idDiaRutina

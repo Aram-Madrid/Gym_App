@@ -3,7 +3,6 @@ package com.example.ut2_app.model
 import java.io.Serializable
 
 data class Ejercicio(
-    // Propiedades de la DB necesarias para la UI
     val idDato: String,
     val nombre: String,
     val reps: Int,

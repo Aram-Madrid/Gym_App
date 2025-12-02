@@ -9,7 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.result.contract.ActivityResultContracts // 🚨 Importante para el permiso
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -33,11 +33,9 @@ import kotlinx.serialization.Serializable
 // Data class para la notificación
 @Serializable
 data class Notificacion(
-    // ¡CORREGIDO! Los UUIDs son String
     val id: String,
     val mensaje: String,
     val created_at: String,
-    // ¡CORREGIDO! Los UUIDs son String
     val id_usuario_destino: String
 )
 
@@ -45,7 +43,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val supabase = SupabaseClientProvider.supabase
 
-    // 1. 📢 Launcher para solicitar el permiso POST_NOTIFICATIONS
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -64,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Lógica de Notificaciones
-        requestNotificationPermission() // 2. 🚨 Solicitar permiso en Android 13+
+        requestNotificationPermission()
         createNotificationChannel()
         setupRankingNotificationListener()
 
@@ -168,7 +165,6 @@ class MainActivity : AppCompatActivity() {
             .setAutoCancel(true)
             .build()
 
-        // Usamos la hora actual como ID de notificación para que no se sobrescriban
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)
     }
 

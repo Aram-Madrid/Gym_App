@@ -62,7 +62,6 @@ class RankingAdapter(
             if (usuario.esActual) colorAcento else Color.TRANSPARENT
         )
 
-        // 🔑 CLICK LISTENER: Al pulsar, enviamos el ID
         holder.itemView.setOnClickListener {
             onUserClick(usuario.id)
         }

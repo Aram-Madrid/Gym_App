@@ -14,9 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -53,29 +51,24 @@ class UserProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Configurar el botón "Volver" con Navigation Component
         binding.btnVolver.setOnClickListener {
             findNavController().popBackStack()
         }
 
-        // 2. Obtener el ID del usuario desde los argumentos
         val userId = arguments?.getString("USER_ID")
 
         if (userId != null) {
             viewModel.cargarPerfil(userId)
         }
 
-        // 3. Observar y mostrar los datos del usuario (Texto e Imagen)
         lifecycleScope.launch {
             viewModel.usuarioSeleccionado.collectLatest { usuario ->
                 if (usuario != null) {
                     binding.nombreUsuario.text = usuario.nombre
 
-                    // Formato: "1250 ELO - Plata"
                     val rangoTexto = usuario.rango ?: "Cobre"
                     binding.rankingUsuario.text = "${usuario.elo ?: 0} ELO - $rangoTexto"
 
-                    // Cargar imagen con Coil
                     if (!usuario.fotoPerfilUrl.isNullOrEmpty()) {
                         binding.emblemaRanking.load(usuario.fotoPerfilUrl) {
                             crossfade(true)
@@ -89,9 +82,7 @@ class UserProfileFragment : Fragment() {
             }
         }
 
-        // 4. Configurar el Gráfico de Radar (Jetpack Compose)
         binding.composeView.setContent {
-            // Observamos los puntos específicos de ESTE usuario
             val puntosData = viewModel.puntosRendimiento.collectAsState().value
             val isLoading = viewModel.isLoading.collectAsState().value
 
@@ -114,9 +105,6 @@ class UserProfileFragment : Fragment() {
     }
 }
 
-// ═══════════════════════════════════════════════════════════
-// COMPOSABLES - Gráfico de Radar (Copia local para evitar errores)
-// ═══════════════════════════════════════════════════════════
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
@@ -127,7 +115,6 @@ fun MostrarGraficoRadarPerfil(puntosData: List<PuntosGrupoUI>) {
     val categories = puntosData.map { it.grupo }
     val maxRadial = 5f
 
-    // Normalizar valores (0-5)
     val datosNormalizados: List<List<PolarPoint<Float, String>>> = listOf(
         puntosData.map { item ->
             val valorNormalizado = if (item.maximo > 0) {

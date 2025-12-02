@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController // 🔑 Importante
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ut2_app.R
 import com.example.ut2_app.adapters.RankingAdapter
@@ -30,6 +30,46 @@ class RankingFragment : Fragment() {
 
     private val viewModel: RankingViewModel by viewModels()
     private lateinit var rankingAdapter: RankingAdapter
+
+    // --- LÓGICA DE RANGO Y PROGRESO RESTAURADA ---
+
+    private val eloUmbrales = mapOf(
+        "Cobre" to 0, "Bronze" to 500, "Plata" to 1000, "Oro" to 1500,
+        "Esmeralda" to 2000, "Diamante" to 2500, "Campeon" to 3000
+    )
+
+    private fun calcularProgresoHaciaSiguienteRango(eloActual: Short): Int {
+        val umbralesValores = eloUmbrales.values.toList().sorted()
+        val minEloActual = umbralesValores.lastOrNull { it <= eloActual } ?: 0
+        val minEloSiguiente = umbralesValores.firstOrNull { it > eloActual }
+
+        if (minEloSiguiente == null || minEloSiguiente == minEloActual) {
+            return if (eloActual >= 3000) 100 else 0
+        }
+
+        val eloDiferenciaTotal = minEloSiguiente - minEloActual
+        val eloGanadoEnRango = eloActual - minEloActual
+
+        if (eloDiferenciaTotal <= 0) return 0
+
+        val progreso = (eloGanadoEnRango.toDouble() / eloDiferenciaTotal.toDouble()) * 100
+        return progreso.toInt().coerceIn(0, 100)
+    }
+
+    private fun getEmblemaResourceId(nombreRango: String): Int {
+        return when (nombreRango) {
+            "Campeon" -> R.drawable.ic_rank_campeon
+            "Diamante" -> R.drawable.ic_rank_diamante
+            "Esmeralda" -> R.drawable.ic_rank_esmeralda
+            "Oro" -> R.drawable.ic_rank_oro
+            "Plata" -> R.drawable.ic_rank_plata
+            "Bronze" -> R.drawable.ic_rank_bronce
+            "Cobre" -> R.drawable.ic_rank_cobre
+            else -> R.drawable.place_holder
+        }
+    }
+    // ---------------------------------------------
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,6 +99,8 @@ class RankingFragment : Fragment() {
         observeRanking()
     }
 
+    // ... (onResume y abrirPerfilUsuario sin cambios) ...
+
     override fun onResume() {
         super.onResume()
         viewModel.cargarRanking()
@@ -67,10 +109,31 @@ class RankingFragment : Fragment() {
     private fun observeRanking() {
         viewModel.usuariosRanking.observe(viewLifecycleOwner) { listaUsuarios ->
             rankingAdapter.actualizarLista(listaUsuarios)
+
+            // --- LÓGICA DE ASIGNACIÓN DE EMBLEMA Y BARRA DE PROGRESO (RESTAURADA) ---
+            val usuarioActual = listaUsuarios.find { it.esActual }
+
+            if (usuarioActual != null) {
+                // 1. Asignar Emblema
+                val rangoActual = usuarioActual.rango
+                if (!rangoActual.isNullOrEmpty()) {
+                    val emblemaId = getEmblemaResourceId(rangoActual)
+                    binding.emblemaRanking.setImageResource(emblemaId)
+                } else {
+                    binding.emblemaRanking.setImageResource(R.drawable.place_holder)
+                }
+
+                // 2. Asignar Progreso de Barra
+                val progreso = calcularProgresoHaciaSiguienteRango(usuarioActual.elo)
+                binding.barraExperiencia.progress = progreso
+
+            } else {
+                binding.emblemaRanking.setImageResource(R.drawable.place_holder)
+                binding.barraExperiencia.progress = 0
+            }
+            // --------------------------------------------------------------------------
         }
     }
-
-    // --- NAVEGACIÓN CORREGIDA ---
 
     private fun abrirPerfilUsuario(userId: String) {
         // Preparamos los datos
@@ -78,12 +141,9 @@ class RankingFragment : Fragment() {
             putString("USER_ID", userId)
         }
 
-        // 🔑 Usamos el NavController para navegar de forma segura
         try {
-            // Opción A: Usando la acción definida en el XML (Recomendado)
             findNavController().navigate(R.id.action_rankingFragment_to_userProfileFragment, bundle)
         } catch (e: Exception) {
-            // Opción B: Navegación directa por ID si la acción falla
             try {
                 findNavController().navigate(R.id.userProfileFragment, bundle)
             } catch (e2: Exception) {
@@ -92,7 +152,8 @@ class RankingFragment : Fragment() {
         }
     }
 
-    // --- LÓGICA DE AÑADIR AMIGO (Se mantiene igual) ---
+
+    // ... (Lógica de Añadir Amigo sin cambios) ...
 
     private fun mostrarDialogoAgregarAmigo() {
         val builder = AlertDialog.Builder(requireContext())

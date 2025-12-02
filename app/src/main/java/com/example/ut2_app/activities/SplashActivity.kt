@@ -36,7 +36,6 @@ class SplashActivity : AppCompatActivity() {
 
     private fun checkSessionAndNavigate() {
         lifecycleScope.launch {
-            // 🔑 LÓGICA DE SESIÓN PERSISTENTE
             // Comprobamos si Supabase tiene un usuario guardado en local
             val usuarioActual = SupabaseClientProvider.supabase.auth.currentUserOrNull()
 
