@@ -7,6 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.ut2_app.model.Ejercicio
 import com.example.ut2_app.model.RutinaDiaDatosConEjercicio
 import com.example.ut2_app.model.RutinaDiaDatoInsert
+import com.example.ut2_app.model.Serie
+import com.example.ut2_app.model.SerieDB
+import com.example.ut2_app.util.AuthManager
+import com.example.ut2_app.util.PTMCalculator
 import com.example.ut2_app.util.SupabaseClientProvider
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
@@ -53,14 +57,36 @@ class EjercicioViewModel(private val idDiaRutina: String?) : ViewModel() {
                     }
                     .decodeList<RutinaDiaDatosConEjercicio>()
 
+                // 🔑 Para cada ejercicio, cargar sus series individuales
                 val listaMapeada = resultados.map { item ->
+                    // Cargar series de este ejercicio
+                    val seriesDelEjercicio = try {
+                        postgrestClient["series"]
+                            .select {
+                                filter {
+                                    eq("id_dato", item.id_dato)
+                                }
+                            }
+                            .decodeList<SerieDB>()
+                            .sortedBy { it.numeroSerie } // Ordenar por número de serie
+                            .map { serieDB ->
+                                Serie(
+                                    peso = serieDB.peso,
+                                    repeticiones = serieDB.repeticiones
+                                )
+                            }
+                    } catch (e: Exception) {
+                        Log.e("EjercicioViewModel", "Error cargando series: ${e.message}")
+                        emptyList()
+                    }
+
                     Ejercicio(
                         idDato = item.id_dato,
                         nombre = item.ejercicio.nombre,
                         reps = item.reps,
                         peso = item.peso,
                         dificultad = item.dificultad,
-                        series = emptyList() // TODO: Implementar carga de series individuales
+                        series = seriesDelEjercicio // 🔑 Ahora incluye las series reales
                     )
                 }
 
@@ -77,6 +103,10 @@ class EjercicioViewModel(private val idDiaRutina: String?) : ViewModel() {
         }
     }
 
+    /**
+     * Guarda un ejercicio nuevo (versión legacy - considera usar guardarEjercicioConSeries).
+     * Esta función se mantiene por compatibilidad pero no guarda series individuales.
+     */
     suspend fun guardarEjercicio(ejercicio: Ejercicio) {
         // 🔑 Validar que tengamos un ID de día válido
         val idDia = idDiaRutina
@@ -90,6 +120,18 @@ class EjercicioViewModel(private val idDiaRutina: String?) : ViewModel() {
         // El idDato del ejercicio es en realidad el id_ejercicio (FK al catálogo)
         val idFkEjercicio = ejercicio.idDato
 
+        // 🔑 CALCULAR PTM Y ELO
+        val ptm = PTMCalculator.calcularPTM(ejercicio.peso, ejercicio.reps, ejercicio.dificultad)
+
+        // Obtener ELO actual del usuario para calcular cambio
+        val usuarioActual = AuthManager.getCurrentUserData()
+        val eloActualUsuario = usuarioActual?.elo ?: 1000
+
+        val cambioELO = PTMCalculator.calcularCambioELO(ptm, eloActualUsuario)
+        val nuevoELO = PTMCalculator.aplicarCambioELO(eloActualUsuario, cambioELO)
+
+        Log.d("EjercicioViewModel", "Guardando ejercicio: PTM=$ptm, Cambio ELO=$cambioELO")
+
         // 🔑 USAR NOMBRE CORRECTO: routine_day_id
         val datoParaInsertar = RutinaDiaDatoInsert(
             id_dato = idDatoFinal,
@@ -97,7 +139,9 @@ class EjercicioViewModel(private val idDiaRutina: String?) : ViewModel() {
             id_ejercicio = idFkEjercicio,
             reps = ejercicio.reps,
             peso = ejercicio.peso,
-            dificultad = ejercicio.dificultad
+            dificultad = ejercicio.dificultad,
+            ptm = ptm,
+            elo = nuevoELO.toDouble()
         )
 
         try {
