@@ -6,11 +6,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.ut2_app.databinding.ActivityCrearCuentaBinding
-import com.example.ut2_app.model.Usuario
 import com.example.ut2_app.util.SupabaseClientProvider
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.postgrest.postgrest
+// 🔑 IMPORTACIONES CLAVE
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlinx.coroutines.launch
 
 class CrearCuentaActivity : AppCompatActivity() {
@@ -29,14 +31,8 @@ class CrearCuentaActivity : AppCompatActivity() {
             val alturaStr = binding.alturaUsuario.text.toString().trim()
             val pesoStr = binding.peso.text.toString().trim()
 
-            if (email.isEmpty() || password.isEmpty() || nombre.isEmpty() ||
-                alturaStr.isEmpty() || pesoStr.isEmpty()
-            ) {
-                Toast.makeText(
-                    this,
-                    "Por favor, completa todos los campos",
-                    Toast.LENGTH_SHORT
-                ).show()
+            if (email.isEmpty() || password.isEmpty() || nombre.isEmpty()) {
+                Toast.makeText(this, "Completa los campos obligatorios", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -53,52 +49,52 @@ class CrearCuentaActivity : AppCompatActivity() {
     ) {
         lifecycleScope.launch {
             try {
-                // 1. Crear usuario en Auth
+                // 1. Crear usuario en Auth (Sistema de seguridad)
                 supabase.auth.signUpWith(Email) {
                     this.email = email
                     this.password = password
                 }
 
-                // 2. Obtener el usuario recién creado
                 val authUser = supabase.auth.currentUserOrNull()
 
                 if (authUser != null) {
+                    // 2. Construir JSON seguro para insertar en tabla pública 'usuarios'
+                    // Esto evita el error de serialización y conflicto de datos
+                    val usuarioJson = buildJsonObject {
+                        put("id", authUser.id)
+                        put("nombre", nombre)
+                        put("email", email)
+                        // Datos opcionales
+                        if (alturaStr.isNotEmpty()) put("altura", alturaStr.toInt())
+                        if (pesoStr.isNotEmpty()) put("peso", pesoStr.toInt())
 
-                    // 3. Construir el objeto Usuario
-                    val usuario = Usuario(
-                        id = authUser.id,
-                        nombre = nombre,
-                        email = email,
-                        altura = alturaStr.toIntOrNull(),
-                        peso = pesoStr.toIntOrNull()
-                    )
+                        // 🔑 VALORES INICIALES HARDCORE (Desde Cero)
+                        put("elo", 0)
+                        put("rango", "Cobre")
+                        put("ultimo_puntaje", 0)
+                    }
 
-                    // 4. Guardarlo en la tabla "usuarios"
-                    supabase.postgrest["usuarios"].insert(usuario)
+                    // 3. Insertar en tabla usuarios
+                    supabase.postgrest["usuarios"].insert(usuarioJson)
 
-                    Toast.makeText(
-                        this@CrearCuentaActivity,
-                        "Cuenta creada correctamente",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    // 4. Inicializar sus puntos de grupo muscular a 0 (Para el gráfico)
+                    // Llamamos al trigger que ya tienes o insertamos manualmente si fallara
+                    // (El trigger 'inicializar_puntos_grupo' que tienes debería encargarse,
+                    // pero por seguridad el insert del usuario es lo principal).
 
+                    Toast.makeText(this@CrearCuentaActivity, "Cuenta creada. ¡Bienvenido!", Toast.LENGTH_SHORT).show()
+
+                    // Ir a la App
                     startActivity(Intent(this@CrearCuentaActivity, MainActivity::class.java))
                     finish()
 
                 } else {
-                    Toast.makeText(
-                        this@CrearCuentaActivity,
-                        "Verifica tu correo e inicia sesión",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(this@CrearCuentaActivity, "Revisa tu email para confirmar.", Toast.LENGTH_LONG).show()
                 }
 
             } catch (e: Exception) {
-                Toast.makeText(
-                    this@CrearCuentaActivity,
-                    "Error creando cuenta: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                // Manejo de error si el usuario ya existe o falla la red
+                Toast.makeText(this@CrearCuentaActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }

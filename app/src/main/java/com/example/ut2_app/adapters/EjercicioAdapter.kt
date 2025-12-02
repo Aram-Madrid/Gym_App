@@ -9,8 +9,6 @@ import com.example.ut2_app.databinding.ItemEjercicioBinding
 import com.example.ut2_app.model.Ejercicio
 
 class EjercicioAdapter(
-    // 🔑 CORRECCIÓN 1: Cambiamos a 'var' para poder reasignar la lista (incluso si es inmutable)
-    // Usaremos una lista mutable internamente para la actualización
     private var ejercicios: List<Ejercicio>
 ) : RecyclerView.Adapter<EjercicioAdapter.EjercicioViewHolder>() {
 
@@ -18,26 +16,88 @@ class EjercicioAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(ejercicio: Ejercicio) {
-            Log.d("EjercicioAdapter", "Mostrando ejercicio: ${ejercicio.nombre}, reps=${ejercicio.reps}, peso=${ejercicio.peso}")
+            Log.d("EjercicioAdapter", "Mostrando: ${ejercicio.nombre}, series=${ejercicio.series.size}")
 
             // Mostrar nombre del ejercicio
             binding.textViewNombreEjercicio.text = ejercicio.nombre
 
-            // 🔑 Mostrar resumen: Reps totales y Peso
-            val resumen = buildString {
-                append("Total: ${ejercicio.reps} reps")
-                if (ejercicio.peso > 0) {
-                    append(" • Peso: ${String.format("%.1f", ejercicio.peso)} kg")
+            // 🔑 FORMATO SOLICITADO: Mostrar series individuales
+            if (ejercicio.series.isNotEmpty()) {
+                // Formato: "2 series de 20 reps y 10 kg la primera y 10 reps 10 kg la segunda"
+                val resumen = buildString {
+                    append("${ejercicio.series.size} ")
+                    append(if (ejercicio.series.size == 1) "serie" else "series")
+                    append(" de ")
+
+                    ejercicio.series.forEachIndexed { index, serie ->
+                        when (index) {
+                            0 -> {
+                                // Primera serie
+                                append("${serie.repeticiones} reps y ${formatPeso(serie.peso)} kg")
+                            }
+                            ejercicio.series.size - 1 -> {
+                                // Última serie
+                                append(" y ${serie.repeticiones} reps y ${formatPeso(serie.peso)} kg la ${numeroATexto(index + 1)}")
+                            }
+                            else -> {
+                                // Series intermedias
+                                append(", ${serie.repeticiones} reps y ${formatPeso(serie.peso)} kg")
+                            }
+                        }
+                    }
+
+                    // Solo añadir "la primera/segunda" si hay 2 series
+                    if (ejercicio.series.size == 2) {
+                        // Ya está manejado arriba
+                    } else if (ejercicio.series.size > 2) {
+                        // Para más de 2 series, no usar texto descriptivo
+                    } else if (ejercicio.series.size == 1) {
+                        // Una sola serie, no necesita descripción adicional
+                    }
                 }
-                if (ejercicio.dificultad > 0) {
-                    append(" • Dificultad: ${String.format("%.1f", ejercicio.dificultad)}")
-                }
+
+                binding.textViewResumenSeries.text = resumen
+                binding.textViewResumenSeries.visibility = View.VISIBLE
+
+                Log.d("EjercicioAdapter", "Resumen: $resumen")
+            } else {
+                // Si no hay series individuales guardadas, mostrar totales
+                val resumen = "Total: ${ejercicio.reps} reps • Peso: ${formatPeso(ejercicio.peso)} kg"
+                binding.textViewResumenSeries.text = resumen
+                binding.textViewResumenSeries.visibility = View.VISIBLE
+
+                Log.d("EjercicioAdapter", "Sin series, mostrando totales")
             }
+        }
 
-            binding.textViewResumenSeries.text = resumen
-            binding.textViewResumenSeries.visibility = View.VISIBLE
+        /**
+         * Formatea el peso para mostrar sin decimales si es entero.
+         */
+        private fun formatPeso(peso: Double): String {
+            return if (peso % 1.0 == 0.0) {
+                peso.toInt().toString()
+            } else {
+                String.format("%.1f", peso)
+            }
+        }
 
-            Log.d("EjercicioAdapter", "Resumen mostrado: $resumen")
+        /**
+         * Convierte número a texto ordinal.
+         */
+        private fun numeroATexto(numero: Int): String {
+            return when (numero) {
+                1 -> "primera"
+                2 -> "segunda"
+                3 -> "tercera"
+                4 -> "cuarta"
+                5 -> "quinta"
+                6 -> "sexta"
+                7 -> "séptima"
+                8 -> "octava"
+                9 -> "novena"
+                10 -> "décima"
+                else -> "${numero}ª"
+            }
         }
     }
 
@@ -56,17 +116,11 @@ class EjercicioAdapter(
 
     override fun getItemCount(): Int = ejercicios.size
 
-    // 🔑 CORRECCIÓN 2: Método actualizarLista para el LiveData del ViewModel
     /**
-     * Reemplaza la lista actual de ejercicios con la nueva lista del ViewModel (Supabase).
-     * @param nuevaLista La lista de Ejercicio obtenida del ViewModel.
+     * Actualiza la lista de ejercicios y notifica al RecyclerView.
      */
     fun actualizarLista(nuevaLista: List<Ejercicio>) {
-        // Asignamos la nueva lista.
-        // Es más eficiente reasignar la referencia que clonar y limpiar si es una lista grande.
         this.ejercicios = nuevaLista
-
-        // Notificamos al RecyclerView el cambio completo del dataset.
         notifyDataSetChanged()
     }
 }

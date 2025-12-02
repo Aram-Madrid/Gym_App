@@ -32,20 +32,19 @@ class MiRutinaFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 🔑 INICIALIZACIÓN: Pasamos el lifecycleOwner y el callback de creación
         rutinaAdapter = RutinaAdapter(
-            listaDias = emptyList(),
+            listaItems = emptyList(),
             lifecycleOwner = viewLifecycleOwner,
-            onCrearRutina = { nombreDia ->
-                // 🔑 Callback: Este código se ejecuta cuando se hace click en un día sin rutina
-                viewModel.crearRutinaDia(nombreDia)
+            // 🔑 Callback recibe nombreDia Y fechaObjetivo
+            onCrearRutina = { nombreDia, fechaObjetivo ->
+                viewModel.crearRutinaDia(nombreDia, fechaObjetivo)
             }
         )
 
         binding.recyclerViewRutinas.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = rutinaAdapter
-            addItemDecoration(VerticalSpaceItemDecoration(30))
+            addItemDecoration(VerticalSpaceItemDecoration(20))
         }
 
         observeDiasRutina()
@@ -53,13 +52,12 @@ class MiRutinaFragment : Fragment() {
     }
 
     private fun observeDiasRutina() {
-        viewModel.diasSemana.observe(viewLifecycleOwner) { listaDiasCombinada ->
-            rutinaAdapter.actualizarLista(listaDiasCombinada)
+        viewModel.itemsRutina.observe(viewLifecycleOwner) { listaVisual ->
+            rutinaAdapter.actualizarLista(listaVisual)
         }
 
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            // Opcional: Mostrar un ProgressBar mientras carga
-            // binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            // ProgressBar logic
         }
     }
 
@@ -73,7 +71,6 @@ class MiRutinaFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // 🔑 Recargar al volver (para reflejar nuevos ejercicios añadidos)
         viewModel.cargarRutinas()
     }
 

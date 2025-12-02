@@ -1,289 +1,155 @@
 package com.example.ut2_app.fragments
 
+import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController // 🔑 Importante
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ut2_app.R
 import com.example.ut2_app.adapters.RankingAdapter
 import com.example.ut2_app.databinding.FragmentRankingBinding
+import com.example.ut2_app.viewmodels.RankingViewModel
+import com.example.ut2_app.util.AuthManager
 import com.example.ut2_app.util.SupabaseClientProvider
-import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.rpc
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-
-// CLASE DATA: DEBE incluir el campo 'rango'
-@Serializable
-data class UsuarioData(
-    val id: String,
-    val nombre: String,
-    val email: String,
-    val elo: Int,
-    val fotoperfilurl: String? = null,
-    val rango: String? = null
-)
 
 class RankingFragment : Fragment() {
 
     private var _binding: FragmentRankingBinding? = null
-    // Propiedad calculada para acceder al binding de forma segura
     private val binding get() = _binding!!
 
-    private val supabase = SupabaseClientProvider.supabase
-
-    /**
-     * Define los umbrales mínimos de ELO para cada rango.
-     * * CORRECCIÓN: Se quita el .toSortedMap(compareBy { eloUmbrales[it] })
-     * para evitar el error de recursividad en el compilador.
-     * Se usa un mapa simple, y la función de cálculo usará los valores ordenados.
-     */
-    private val eloUmbrales = mapOf(
-        "Cobre" to 0,
-        "Bronze" to 500,
-        "Plata" to 1000,
-        "Oro" to 1500,
-        "Esmeralda" to 2000,
-        "Diamante" to 2500,
-        "Campeon" to 3000
-    )
+    private val viewModel: RankingViewModel by viewModels()
+    private lateinit var rankingAdapter: RankingAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inicializar View Binding
         _binding = FragmentRankingBinding.inflate(inflater, container, false)
-
-        binding.btnAgregarAmigo.setOnClickListener {
-            mostrarDialogoAgregarAmigo()
-        }
-
-        binding.recyclerRanking.layoutManager = LinearLayoutManager(requireContext())
-
-        cargarRankingAmigos()
-
         return binding.root
     }
 
-    // --- LÓGICA DE EMBLEMAS Y PROGRESO DE RANGO ---
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-    /**
-     * Calcula el porcentaje de progreso (0-100) hacia el siguiente rango.
-     */
-    private fun calcularProgresoHaciaSiguienteRango(eloActual: Int): Int {
-        // Obtenemos los valores de ELO y los ordenamos para el cálculo
-        val umbralesValores = eloUmbrales.values.toList().sorted()
-
-        // Encontrar el umbral de la liga actual (minEloActual)
-        val minEloActual = umbralesValores.lastOrNull { it <= eloActual } ?: 0
-
-        // Encontrar el umbral de la siguiente liga (minEloSiguiente)
-        val minEloSiguiente = umbralesValores.firstOrNull { it > eloActual }
-
-        if (minEloSiguiente == null || minEloSiguiente == minEloActual) {
-            // Estás en el rango más alto ("Campeon") o no hay siguiente rango.
-            return if (eloActual >= 3000) 100 else 0
+        // Callback de navegación
+        rankingAdapter = RankingAdapter(requireContext(), emptyList()) { userId ->
+            abrirPerfilUsuario(userId)
         }
 
-        val eloDiferenciaTotal = minEloSiguiente - minEloActual
-        val eloGanadoEnRango = eloActual - minEloActual
+        binding.recyclerRanking.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = rankingAdapter
+        }
 
-        if (eloDiferenciaTotal <= 0) return 0
+        binding.fabAddFriend.setOnClickListener {
+            mostrarDialogoAgregarAmigo()
+        }
 
-        // Fórmula: (Progreso Actual / Diferencia Total) * 100
-        val progreso = (eloGanadoEnRango.toDouble() / eloDiferenciaTotal.toDouble()) * 100
-
-        return progreso.toInt().coerceIn(0, 100)
+        observeRanking()
     }
 
-    /**
-     * Mapea el nombre del rango (obtenido de la BD) al ID de recurso Drawable.
-     */
-    private fun getEmblemaResourceId(nombreRango: String): Int {
-        return when (nombreRango) {
-            "Campeon" -> R.drawable.ic_rank_campeon
-            "Diamante" -> R.drawable.ic_rank_diamante
-            "Esmeralda" -> R.drawable.ic_rank_esmeralda
-            "Oro" -> R.drawable.ic_rank_oro
-            "Plata" -> R.drawable.ic_rank_plata
-            "Bronze" -> R.drawable.ic_rank_bronce
-            "Cobre" -> R.drawable.ic_rank_cobre
-            else -> R.drawable.place_holder
+    override fun onResume() {
+        super.onResume()
+        viewModel.cargarRanking()
+    }
+
+    private fun observeRanking() {
+        viewModel.usuariosRanking.observe(viewLifecycleOwner) { listaUsuarios ->
+            rankingAdapter.actualizarLista(listaUsuarios)
         }
     }
 
-    // --- LÓGICA DE CARGA DE RANKING ---
+    // --- NAVEGACIÓN CORREGIDA ---
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun cargarRankingAmigos() {
-        val uidActual = supabase.auth.currentUserOrNull()?.id
-        if (uidActual == null) {
-            Toast.makeText(requireContext(), "Error: usuario no autenticado", Toast.LENGTH_SHORT).show()
-            return
+    private fun abrirPerfilUsuario(userId: String) {
+        // Preparamos los datos
+        val bundle = Bundle().apply {
+            putString("USER_ID", userId)
         }
 
-        val usuarios = mutableListOf<Usuario>()
-        val adapter = RankingAdapter(requireContext(), usuarios)
-        binding.recyclerRanking.adapter = adapter
-
-        binding.emblemaRanking.setImageResource(R.drawable.place_holder)
-
-        lifecycleScope.launch {
+        // 🔑 Usamos el NavController para navegar de forma segura
+        try {
+            // Opción A: Usando la acción definida en el XML (Recomendado)
+            findNavController().navigate(R.id.action_rankingFragment_to_userProfileFragment, bundle)
+        } catch (e: Exception) {
+            // Opción B: Navegación directa por ID si la acción falla
             try {
-                // PASO 1: Obtener los IDs de amigos
-                val amigosResponse = supabase.postgrest["amigos"]
-                    .select { filter { eq("id", uidActual) } }
-                    .decodeList<Map<String, String>>()
-
-                val friendIds = amigosResponse.mapNotNull { it["id_amigo"] }.toMutableList()
-                friendIds.add(uidActual) // Añadir el ID del usuario actual
-
-                if (friendIds.isEmpty()) {
-                    adapter.notifyDataSetChanged()
-                    return@launch
-                }
-
-                // PASO 2: Obtener los datos de perfil, incluido el campo 'rango'
-                val usersResponse = supabase.postgrest["usuarios"]
-                    .select() { filter { isIn("id", friendIds) } }
-                    .decodeList<UsuarioData>()
-
-                var rangoUsuarioActual: String? = null
-                var eloUsuarioActual: Int? = null
-
-                // Mapeo al adaptador y captura del RANGO y ELO del usuario actual
-                usuarios.clear()
-                for (userData in usersResponse) {
-                    val esActual = userData.id == uidActual
-                    if (esActual) {
-                        rangoUsuarioActual = userData.rango
-                        eloUsuarioActual = userData.elo
-                    }
-                    usuarios.add(
-                        Usuario(
-                            nombre = userData.nombre,
-                            puntuacion = userData.elo,
-                            fotoUrl = userData.fotoperfilurl,
-                            posicion = 0,
-                            esActual = esActual
-                        )
-                    )
-                }
-
-                // Lógica de clasificación
-                usuarios.sortByDescending { it.puntuacion }
-                usuarios.forEachIndexed { index, usuario -> usuario.posicion = index + 1 }
-
-                adapter.notifyDataSetChanged()
-
-                // --- ASIGNACIÓN DE EMBLEMA USANDO EL CAMPO 'rango' DE LA BD ---
-                if (rangoUsuarioActual != null) {
-                    val emblemaId = getEmblemaResourceId(rangoUsuarioActual)
-                    binding.emblemaRanking.setImageResource(emblemaId)
-                    Log.d("RANKING_FRAG", "Rango obtenido de BD: $rangoUsuarioActual. Emblema asignado: $emblemaId")
-                } else {
-                    Log.w("RANKING_FRAG", "El campo 'rango' es null para el usuario actual.")
-                    binding.emblemaRanking.setImageResource(R.drawable.place_holder)
-                }
-
-                // --- ASIGNACIÓN DEL PROGRESO DE LA BARRA ---
-                if (eloUsuarioActual != null) {
-                    val progreso = calcularProgresoHaciaSiguienteRango(eloUsuarioActual)
-                    binding.barraExperiencia.progress = progreso
-                    Log.d("RANKING_FRAG", "Progreso de liga calculado: $progreso%")
-                } else {
-                    binding.barraExperiencia.progress = 0
-                }
-                // -----------------------------------------------------
-
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error al cargar ranking: ${e.message}", Toast.LENGTH_LONG).show()
-                Log.e("RANKING_FRAG", "Error en cargarRankingAmigos: ", e)
+                findNavController().navigate(R.id.userProfileFragment, bundle)
+            } catch (e2: Exception) {
+                Toast.makeText(requireContext(), "Error de navegación: ${e2.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    // --- LÓGICA DE AGREGAR AMIGO (sin cambios) ---
+    // --- LÓGICA DE AÑADIR AMIGO (Se mantiene igual) ---
 
     private fun mostrarDialogoAgregarAmigo() {
-        val context = requireContext()
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle("Agregar amigo")
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Añadir Amigo")
+        builder.setMessage("Introduce el correo de tu amigo:")
 
-        val input = EditText(context)
-        input.hint = "Correo del amigo"
-        builder.setView(input)
+        val input = EditText(requireContext())
+        input.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
 
-        builder.setPositiveButton("Agregar") { dialog, _ ->
-            val texto = input.text.toString().trim()
-            if (texto.isNotEmpty()) {
-                agregarAmigo(texto)
-            } else {
-                Toast.makeText(context, "Introduce un correo", Toast.LENGTH_SHORT).show()
+        val container = android.widget.FrameLayout(requireContext())
+        val params = android.widget.FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        val margin = resources.getDimensionPixelSize(com.example.ut2_app.R.dimen.margin_medium)
+        params.leftMargin = margin
+        params.rightMargin = margin
+        input.layoutParams = params
+        container.addView(input)
+
+        builder.setView(container)
+
+        builder.setPositiveButton("Añadir") { _, _ ->
+            val emailAmigo = input.text.toString().trim()
+            if (emailAmigo.isNotEmpty()) {
+                agregarAmigo(emailAmigo)
             }
-            dialog.dismiss()
         }
+        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.cancel() }
 
-        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
         builder.show()
     }
 
-
     private fun agregarAmigo(emailAmigo: String) {
-        val userId = supabase.auth.currentUserOrNull()?.id?: return
-
-        val cleanedEmail = emailAmigo.trim()
-
         lifecycleScope.launch {
             try {
-                // LLAMADA RPC para obtener el ID del amigo por email (sin cambios)
-                val result = supabase.postgrest
-                    .rpc(
-                        function = "get_user_profile_by_email",
-                        parameters = mapOf("p_email" to cleanedEmail)
+                val userId = AuthManager.getCurrentUserId() ?: return@launch
+
+                val respuesta = SupabaseClientProvider.supabase.postgrest.rpc(
+                    "agregar_amigo_por_email",
+                    mapOf(
+                        "p_id_usuario" to userId,
+                        "p_email_amigo" to emailAmigo
                     )
-                    .decodeList<UsuarioData>()
+                ).decodeAs<String>()
 
-                if (result.isEmpty()) {
-                    Toast.makeText(requireContext(), "No existe un usuario con ese correo", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-
-                val amigo = result.first()
-                val amigoId = amigo.id
-                val amigoNombre = amigo.nombre
-
-                if (amigoId == userId) {
-                    Toast.makeText(requireContext(), "No puedes agregarte a ti mismo", Toast.LENGTH_SHORT).show()
-                    return@launch
-                }
-
-                // PASO 2: Insertar la relación de amistad (sin cambios)
-                val amigoData = mapOf(
-                    "id" to userId,
-                    "id_amigo" to amigoId
-                )
-
-                supabase.postgrest["amigos"].insert(listOf(amigoData))
-
-                Toast.makeText(requireContext(), "$amigoNombre añadido a tus amigos", Toast.LENGTH_SHORT).show()
-                cargarRankingAmigos()
+                Toast.makeText(requireContext(), respuesta, Toast.LENGTH_LONG).show()
+                viewModel.cargarRanking()
 
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error al agregar amigo: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Limpiar el binding para evitar fugas de memoria
         _binding = null
     }
 }

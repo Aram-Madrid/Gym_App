@@ -7,11 +7,18 @@ import androidx.lifecycle.viewModelScope
 import com.example.ut2_app.model.Ejercicio
 import com.example.ut2_app.model.RutinaDiaDatosConEjercicio
 import com.example.ut2_app.model.RutinaDiaDatoInsert
+import com.example.ut2_app.model.Serie
+import com.example.ut2_app.model.SerieDB
+import com.example.ut2_app.util.AuthManager
+import com.example.ut2_app.util.PTMCalculator
 import com.example.ut2_app.util.SupabaseClientProvider
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
 import android.util.Log
 import io.github.jan.supabase.postgrest.query.Columns.Companion.list
+// 🔑 Importaciones para la actualización manual segura
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.util.UUID
 
 class EjercicioViewModel(private val idDiaRutina: String?) : ViewModel() {
@@ -31,9 +38,7 @@ class EjercicioViewModel(private val idDiaRutina: String?) : ViewModel() {
 
     fun cargarEjercicios() {
         viewModelScope.launch {
-            // 🔑 MANEJO CORRECTO DE NULL: Si no hay ID, lista vacía
             if (idDiaRutina == null) {
-                Log.d("EjercicioViewModel", "Modo creación: sin ID de día, mostrando lista vacía")
                 _listaEjercicios.postValue(emptyList())
                 return@launch
             }
@@ -44,32 +49,37 @@ class EjercicioViewModel(private val idDiaRutina: String?) : ViewModel() {
             try {
                 val postgrestClient = SupabaseClientProvider.supabase.postgrest
 
-                // 🔑 AHORA idDiaRutina es String (no null), seguro para usar
                 val resultados = postgrestClient["rutina_dia_datos"]
                     .select(list("*, ejercicio(*)")) {
-                        filter {
-                            eq("routine_day_id", idDiaRutina)
-                        }
+                        filter { eq("routine_day_id", idDiaRutina) }
                     }
                     .decodeList<RutinaDiaDatosConEjercicio>()
 
                 val listaMapeada = resultados.map { item ->
+                    val seriesDelEjercicio = try {
+                        postgrestClient["series"]
+                            .select { filter { eq("id_dato", item.id_dato) } }
+                            .decodeList<SerieDB>()
+                            .sortedBy { it.numeroSerie }
+                            .map { serieDB ->
+                                Serie(serieDB.peso, serieDB.repeticiones)
+                            }
+                    } catch (e: Exception) { emptyList() }
+
                     Ejercicio(
                         idDato = item.id_dato,
                         nombre = item.ejercicio.nombre,
                         reps = item.reps,
                         peso = item.peso,
                         dificultad = item.dificultad,
-                        series = emptyList() // TODO: Implementar carga de series individuales
+                        series = seriesDelEjercicio
                     )
                 }
 
                 _listaEjercicios.postValue(listaMapeada)
-                Log.d("EjercicioViewModel", "Cargados ${listaMapeada.size} ejercicios para día: $idDiaRutina")
 
             } catch (e: Exception) {
-                Log.e("EjercicioViewModel", "Error al cargar ejercicios: ${e.message}", e)
-                _error.postValue("Error al cargar ejercicios: ${e.localizedMessage}")
+                _error.postValue("Error al cargar: ${e.message}")
                 _listaEjercicios.postValue(emptyList())
             } finally {
                 _isLoading.postValue(false)
@@ -77,34 +87,60 @@ class EjercicioViewModel(private val idDiaRutina: String?) : ViewModel() {
         }
     }
 
+    /**
+     * Guarda ejercicio (Legacy/Rápido).
+     * 🔑 ACTUALIZADO: Ahora actualiza manualmente el ELO del usuario porque ya no usamos triggers.
+     */
     suspend fun guardarEjercicio(ejercicio: Ejercicio) {
-        // 🔑 Validar que tengamos un ID de día válido
-        val idDia = idDiaRutina
-            ?: throw IllegalStateException("No se puede guardar ejercicio sin ID de día activo.")
-
+        val idDia = idDiaRutina ?: throw IllegalStateException("Sin ID de día.")
         val postgrestClient = SupabaseClientProvider.supabase.postgrest
-
-        // Generar nuevo ID para el registro
         val idDatoFinal = UUID.randomUUID().toString()
-
-        // El idDato del ejercicio es en realidad el id_ejercicio (FK al catálogo)
         val idFkEjercicio = ejercicio.idDato
 
-        // 🔑 USAR NOMBRE CORRECTO: routine_day_id
+        // 1. Calcular PTM y ELO (Usando función compatible)
+        val ptm = PTMCalculator.calcularPTM(ejercicio.peso, ejercicio.reps, ejercicio.dificultad)
+
+        // Obtener usuario actual
+        val currentUserId = AuthManager.getCurrentUserId() ?: return
+        val usuarioActual = AuthManager.getCurrentUserData()
+        val eloActualUsuario = usuarioActual?.elo ?: 1000
+
+        // Calculamos cambio (Asumimos 0.0 de historial para esta inserción rápida)
+        val cambioELO = PTMCalculator.calcularCambioELO(ptm, eloActualUsuario)
+        val nuevoELO = PTMCalculator.aplicarCambioELO(eloActualUsuario, cambioELO)
+        val nuevoRango = PTMCalculator.obtenerRango(nuevoELO)
+
+        Log.d("EjercicioViewModel", "Guardando legacy: PTM=$ptm, NuevoELO=$nuevoELO")
+
+        // 2. Insertar Dato
         val datoParaInsertar = RutinaDiaDatoInsert(
             id_dato = idDatoFinal,
             routine_day_id = idDia,
             id_ejercicio = idFkEjercicio,
             reps = ejercicio.reps,
             peso = ejercicio.peso,
-            dificultad = ejercicio.dificultad
+            dificultad = ejercicio.dificultad,
+            ptm = ptm,
+            elo = nuevoELO.toDouble()
         )
 
         try {
             postgrestClient["rutina_dia_datos"].insert(datoParaInsertar)
-            Log.d("EjercicioViewModel", "Ejercicio guardado exitosamente: $idDatoFinal")
+
+            // 3. 🔑 ACTUALIZAR USUARIO MANUALMENTE (Reemplazo del trigger borrado)
+            val updateData = buildJsonObject {
+                put("elo", nuevoELO)
+                put("rango", nuevoRango)
+                put("ultimo_puntaje", ptm)
+            }
+            postgrestClient["usuarios"].update(updateData) {
+                filter { eq("id", currentUserId) }
+            }
+
+            Log.d("EjercicioViewModel", "Guardado completo (Datos + Usuario actualizado)")
+
         } catch (e: Exception) {
-            Log.e("EjercicioViewModel", "Fallo al insertar ejercicio: ${e.message}", e)
+            Log.e("EjercicioViewModel", "Fallo al insertar: ${e.message}", e)
             throw e
         }
     }
