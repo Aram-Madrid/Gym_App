@@ -1,50 +1,74 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="top"
-    android:layout_gravity="top"
-    android:orientation="vertical"
-    style="@style/Base.Theme.UT2_App"
-    >
+    android:background="?android:attr/windowBackground">
 
-    <ImageButton
+    <TextView
+        android:id="@+id/tvTituloRanking"
+        style="@style/TituloHome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_agregar_amigo"
-        android:src="@drawable/person_icon"
-        style="@style/EstiloBotonImagen"
-        />
+        android:layout_marginTop="@dimen/margin_medium"
+        android:text="@string/ranking"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/emblema_ranking"
+        android:id="@+id/emblemaRanking"
+        android:layout_width="275dp"
+        android:layout_height="183dp"
+        android:layout_marginTop="@dimen/margin_medium"
+        android:scaleType="fitCenter"
         android:src="@drawable/place_holder"
-        android:layout_marginBottom="35dp"
-        />
-
+        android:contentDescription="Emblema de rango del usuario actual"
+        app:layout_constraintTop_toBottomOf="@+id/tvTituloRanking"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ProgressBar
-        android:id="@+id/barra_experiencia"
+        android:id="@+id/barraExperiencia"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="250dp"
         android:layout_height="20dp"
-        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/margin_small"
+        android:layout_marginBottom="@dimen/margin_medium"
         android:max="100"
-        android:progress="75"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="20dp"
+        android:progress="0"
         android:progressDrawable="@drawable/progress_bar_ranking"
+        app:layout_constraintTop_toBottomOf="@+id/emblemaRanking"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         />
-
-
 
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/recyclerRanking"
-        android:divider="@color/black"
-        android:dividerHeight="1dp"
-        />
-</LinearLayout>
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/margin_small"
+        android:paddingBottom="80dp"
+        android:clipToPadding="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barraExperiencia"
+        tools:listitem="@layout/item_ranking" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddFriend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_large"
+        android:layout_marginBottom="@dimen/margin_large"
+        android:contentDescription="Añadir Amigo"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="?android:attr/colorPrimary"
+        app:tint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,18 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/homeFragment2">
+    app:startDestination="@id/homeFragment">
+
     <fragment
-        android:id="@+id/homeFragment2"
-        android:name="com.example.ut2_app.HomeFragment"
-        android:label="HomeFragment" />
+        android:id="@+id/homeFragment"
+        android:name="com.example.ut2_app.fragments.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" />
+
     <fragment
         android:id="@+id/rankingFragment"
         android:name="com.example.ut2_app.fragments.RankingFragment"
-        android:label="RankingFragment" />
+        android:label="Ranking"
+        tools:layout="@layout/fragment_ranking">
+        <action
+            android:id="@+id/action_rankingFragment_to_userProfileFragment"
+            app:destination="@id/userProfileFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/miRutinaFragment"
         android:name="com.example.ut2_app.fragments.MiRutinaFragment"
-        android:label="MiRutinaFragment" />
+        android:label="Rutina"
+        tools:layout="@layout/fragment_mi_rutina" />
+
+    <fragment
+        android:id="@+id/userProfileFragment"
+        android:name="com.example.ut2_app.fragments.UserProfileFragment"
+        android:label="Perfil Usuario"
+        tools:layout="@layout/fragment_user_profile">
+        <argument
+            android:name="USER_ID"
+            app:argType="string" />
+    </fragment>
+
 </navigation>

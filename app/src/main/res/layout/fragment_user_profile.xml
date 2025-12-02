@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/windowBackground"
+    android:padding="@dimen/padding_medium">
+
+    <ImageButton
+        android:id="@+id/btnVolver"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_revert"
+        app:tint="?android:attr/textColorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/volver" />
+
+    <TextView
+        android:id="@+id/tvTituloPerfil"
+        style="@style/TituloHome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Perfil de Usuario"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/btnVolver"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardInfoUsuario"
+        style="@style/EstiloCardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_medium"
+        app:layout_constraintTop_toBottomOf="@+id/tvTituloPerfil"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="@dimen/padding_medium">
+
+            <ImageView
+                android:id="@+id/emblemaRanking"
+                android:layout_width="@dimen/image_emblem_size"
+                android:layout_height="@dimen/image_emblem_size"
+                android:layout_marginBottom="@dimen/margin_small"
+                android:contentDescription="Foto de perfil"
+                tools:src="@drawable/place_holder" />
+
+            <TextView
+                android:id="@+id/nombreUsuario"
+                style="@style/TituloPrincipalCardview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/nombre_del_usuario" />
+
+            <TextView
+                android:id="@+id/rankingUsuario"
+                style="@style/SubTextoCardview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="---" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/margin_medium"
+        android:layout_marginBottom="@dimen/margin_medium"
+        app:layout_constraintTop_toBottomOf="@+id/cardInfoUsuario"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

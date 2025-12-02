@@ -1,5 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Colores del splash -->
+    <color name="splash_background_dark">#121212</color>
+    <color name="splash_background_light">#FFFFFF</color>
+    <color name="splash_text_dark">#FFFFFF</color>
+    <color name="splash_text_light">#000000</color>
+
+    <!-- Otros colores de la app -->
     <color name="background">#121212</color>
     <color name="hint_color">#DB2187</color>
     <color name="edit_background">#DBDBDB</color>

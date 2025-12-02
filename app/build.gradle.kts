@@ -1,8 +1,11 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0" // plugin necesario para Compose en Kotlin 2.0+
     id("com.google.gms.google-services")
+    kotlin("plugin.serialization")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -17,6 +20,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val props = Properties()
+        val localPropsFile = rootProject.file("local.properties")
+        if (localPropsFile.exists()) {
+            localPropsFile.inputStream().use { props.load(it) }
+        }
+
+        buildConfigField("String", "SUPABASE_URL", "\"${props.getProperty("SUPABASE_URL")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${props.getProperty("SUPABASE_ANON_KEY")}\"")
     }
 
     buildTypes {
@@ -30,13 +42,12 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         viewBinding = true
         compose = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3" // versión del compilador de Compose
-    }
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -53,14 +64,15 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
-    implementation("androidx.navigation:navigation-fragment-ktx:2.9.6")
-    implementation("androidx.navigation:navigation-ui-ktx:2.9.6")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.8.5")
+    implementation("androidx.navigation:navigation-ui-ktx:2.8.5")
     implementation("com.google.android.material:material:1.12.0")
 
     // Compose
     implementation("androidx.activity:activity-compose:1.9.2")
-    implementation("androidx.compose.ui:ui:1.6.0")
-    implementation("androidx.compose.material3:material3:1.3.0")
+    implementation("androidx.compose.ui:ui:1.6.8")
+    implementation("androidx.compose.material3:material3:1.2.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.6.8")
 
     // KoalaPlot
     implementation("io.github.koalaplot:koalaplot-core:0.6.2")
@@ -68,22 +80,38 @@ dependencies {
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
-    // AndroidX / soporte
+    // SplashScreen
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.foundation)
 
     // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.2.6"))
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    implementation("io.github.jan-tennert.supabase:auth-kt")
+    implementation("io.ktor:ktor-client-android:3.3.3")
+    implementation("io.github.jan-tennert.supabase:storage-kt")
+
+    implementation("io.coil-kt:coil:2.6.0")
+
+    implementation("io.github.jan-tennert.supabase:realtime-kt")
+    implementation("io.ktor:ktor-client-okhttp:3.3.3")
+
+    implementation("io.ktor:ktor-client-okhttp:3.3.3")
+    implementation("io.ktor:ktor-client-websockets:3.3.3")
+
+
+
 }
-
-
-//Descargar dependencias necesarias para el grafico
-//https://github.com/KoalaPlot/koalaplot-core
-//Abrir una terminal dentro de esa carpeta
-//ejecutar: ./gradlew publishToMavenLocal
-//Sincronizar gradle

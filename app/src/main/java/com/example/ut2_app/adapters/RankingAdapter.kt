@@ -1,4 +1,4 @@
-package com.example.ut2_app
+package com.example.ut2_app.adapters
 
 import android.content.Context
 import android.graphics.Color
@@ -10,21 +10,16 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-
-data class Usuario(
-    val nombre: String,
-    val puntuacion: Int,
-    val fotoUrl: String? = null,
-    var posicion: Int = 0,
-    val esActual: Boolean = false
-)
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.ut2_app.R
+import com.example.ut2_app.model.UsuarioRankingDB
 
 class RankingAdapter(
     private val context: Context,
-    private val usuarios: List<Usuario>
+    private var usuarios: List<UsuarioRankingDB>,
+    private val onUserClick: (String) -> Unit
 ) : RecyclerView.Adapter<RankingAdapter.UsuarioViewHolder>() {
 
-    // ViewHolder
     class UsuarioViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtPosicion: TextView = view.findViewById(R.id.posicion)
         val txtNombre: TextView = view.findViewById(R.id.nombre)
@@ -44,27 +39,35 @@ class RankingAdapter(
 
         holder.txtPosicion.text = usuario.posicion.toString()
         holder.txtNombre.text = usuario.nombre
-        holder.txtPuntuacion.text = "${usuario.puntuacion} pts"
+        val rangoTexto = usuario.rango ?: "Cobre"
+        holder.txtPuntuacion.text = "${usuario.elo} ELO ($rangoTexto)"
 
-        // Carga la foto
         if (!usuario.fotoUrl.isNullOrEmpty()) {
             Glide.with(context)
                 .load(usuario.fotoUrl)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .placeholder(R.drawable.place_holder)
                 .into(holder.imgFoto)
         } else {
             holder.imgFoto.setImageResource(R.drawable.place_holder)
         }
 
-        // Resaltar usuario actual
         val typedValue = TypedValue()
         context.theme.resolveAttribute(android.R.attr.colorAccent, typedValue, true)
         val colorAcento = typedValue.data
 
         holder.itemView.setBackgroundColor(
-            if (usuario.esActual) colorAcento
-            else Color.TRANSPARENT
+            if (usuario.esActual) colorAcento else Color.TRANSPARENT
         )
 
+        holder.itemView.setOnClickListener {
+            onUserClick(usuario.id)
+        }
+    }
+
+    fun actualizarLista(nuevaLista: List<UsuarioRankingDB>) {
+        this.usuarios = nuevaLista
+        notifyDataSetChanged()
     }
 }

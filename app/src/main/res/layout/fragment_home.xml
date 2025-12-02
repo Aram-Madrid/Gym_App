@@ -1,35 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    style="@style/Base.Theme.UT2_App"
-    >
-
-
+    style="@style/Base.Theme.UT2_App">
 
     <ImageButton
+        android:id="@+id/boton_configuracion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/boton_configuracion"
         android:src="@drawable/settings_icon"
-        style="@style/EstiloBotonImagen"
-        />
+        style="@style/EstiloBotonImagen" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
     </LinearLayout>
 
     <TextView
+        android:id="@+id/nombre_usuario"
+        style="@style/TituloHome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/nombre_de_usuario"
-        style="@style/TituloHome"
-        >
-
-    </TextView>
+        android:text="@string/nombre_de_usuario" />
 
     <FrameLayout
         android:layout_width="130dp"
@@ -44,23 +38,23 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:scaleType="centerCrop"
-            android:src="@drawable/place_holder"
+            android:layout_margin="3dp"
             android:background="@drawable/circle_clip"
             android:clipToOutline="true"
-            android:layout_margin="3dp" />
+            android:scaleType="centerCrop"
+            android:src="@drawable/place_holder" />
     </FrameLayout>
 
     <TextView
+        android:id="@+id/ranking_usuario"
+        style="@style/TituloSecundarioHome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/ranking_n_1"
-        style="@style/TituloSecundarioHome"
-        />
+        android:text="@string/ranking_n_1" />
 
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/composeView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent" />
+
 </LinearLayout>

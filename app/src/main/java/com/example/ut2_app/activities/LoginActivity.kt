@@ -4,94 +4,77 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.ut2_app.databinding.ActivityLoginBinding
-import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
-
-
+import com.example.ut2_app.util.SupabaseClientProvider
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.builtin.Email
+import kotlinx.coroutines.launch
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var auth: FirebaseAuth
+    private val supabase = SupabaseClientProvider.supabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseApp.initializeApp(this)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inicializamos Firebase Auth
-        auth = FirebaseAuth.getInstance()
-
-        //Si ya se inicio sesion directamente ir a home
-        if (FirebaseAuth.getInstance().currentUser != null){
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+        // Si ya hay sesión activa, ir a MainActivity
+        lifecycleScope.launch {
+            if (supabase.auth.currentUserOrNull() != null) {
+                startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                finish()
+            }
         }
 
-        // Botón Iniciar Sesión
+        // Botón: Iniciar sesión
         binding.buttonIniciarSesion.setOnClickListener {
             val email = binding.editTextEmail.text.toString().trim()
             val password = binding.editTextPwd.text.toString().trim()
 
             if (email.isEmpty()) {
                 binding.editTextEmail.error = "Completa todos los campos"
-            } else if (password.isEmpty()) {
-                binding.editTextPwd.error = "Completa todos los campos"
-            } else {
-                iniciarSesion(email, password)
+                return@setOnClickListener
             }
+            if (password.isEmpty()) {
+                binding.editTextPwd.error = "Completa todos los campos"
+                return@setOnClickListener
+            }
+
+            iniciarSesionSupabase(email, password)
         }
 
-        // Botón Crear Cuenta
+        // Botón: Ir a crear cuenta
         binding.buttonCrearCuenta.setOnClickListener {
-            val intent = Intent(this, CrearCuentaActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, CrearCuentaActivity::class.java))
         }
     }
 
-    private fun iniciarSesion(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // todo bem
-                    Toast.makeText(this, "Inicio de sesión exitoso", Toast.LENGTH_SHORT).show()
-                    //Vamos a mainActivity
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    // Switch con el error
-                    val exception = task.exception
-                    when (exception) {
-                        //no esta esa cuenta
-                        is FirebaseAuthInvalidUserException -> {
-                            Toast.makeText(
-                                this,
-                                "No existe una cuenta con ese correo",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        //Se equivoco con la contraseña LOL
-                        is FirebaseAuthInvalidCredentialsException -> {
-                            Toast.makeText(
-                                this,
-                                "Contraseña incorrecta",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        else -> {
-                            //Generado por chatgpt porque no sabia que más podia ir mal
-                            Toast.makeText(
-                                this,
-                                "Error al iniciar sesión: ${exception?.message}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
+    private fun iniciarSesionSupabase(email: String, password: String) {
+        lifecycleScope.launch {
+            try {
+                supabase.auth.signInWith(Email) {
+                    this.email = email
+                    this.password = password
                 }
+
+                Toast.makeText(
+                    this@LoginActivity,
+                    "Inicio de sesión exitoso",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                finish()
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@LoginActivity,
+                    "Error: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
+        }
     }
 }
