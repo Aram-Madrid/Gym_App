@@ -70,14 +70,14 @@ class ConfiguracionActivity : AppCompatActivity() {
             if (!modoOscuro) {
                 moverA = binding.fondoSwitch.width - bola.width - 8f
                 ObjectAnimator.ofFloat(bola, "translationX", moverA).apply {
-                    ObjectAnimator.setFrameDelay(300)
+                    duration = 300
                     start()
                 }
                 fondoAnimado.startTransition(300)
             } else {
                 moverA = 0f
                 ObjectAnimator.ofFloat(bola, "translationX", moverA).apply {
-                    ObjectAnimator.setFrameDelay(300)
+                    duration = 300
                     start()
                 }
                 fondoAnimado.reverseTransition(300)

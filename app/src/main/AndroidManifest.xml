@@ -28,7 +28,7 @@
             android:exported="true" />
 
 
-        <!-- Otras actividades -->
+        <!-- Otras activities -->
         <activity android:name=".activities.SerieActivity" android:exported="false" />
         <activity android:name=".activities.EjercicioActivity" android:exported="false" />
         <activity android:name=".activities.DetalleEjercicioActivity" android:exported="false" />

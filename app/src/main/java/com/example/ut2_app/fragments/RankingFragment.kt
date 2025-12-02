@@ -1,20 +1,15 @@
 package com.example.ut2_app.fragments
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ut2_app.R
 import com.example.ut2_app.adapters.RankingAdapter
-import com.example.ut2_app.adapters.Usuario
 import com.example.ut2_app.databinding.FragmentRankingBinding
 import com.example.ut2_app.util.SupabaseClientProvider
 import io.github.jan.supabase.auth.auth
@@ -37,6 +32,7 @@ data class UsuarioData(
 class RankingFragment : Fragment() {
 
     private var _binding: FragmentRankingBinding? = null
+    // Propiedad calculada para acceder al binding de forma segura
     private val binding get() = _binding!!
 
     private val supabase = SupabaseClientProvider.supabase
@@ -61,6 +57,7 @@ class RankingFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Inicializar View Binding
         _binding = FragmentRankingBinding.inflate(inflater, container, false)
 
         binding.btnAgregarAmigo.setOnClickListener {
@@ -286,6 +283,7 @@ class RankingFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // Limpiar el binding para evitar fugas de memoria
         _binding = null
     }
 }
