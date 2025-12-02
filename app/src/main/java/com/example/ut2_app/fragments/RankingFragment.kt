@@ -31,7 +31,6 @@ class RankingFragment : Fragment() {
     private val viewModel: RankingViewModel by viewModels()
     private lateinit var rankingAdapter: RankingAdapter
 
-    // --- LÓGICA DE RANGO Y PROGRESO RESTAURADA ---
 
     private val eloUmbrales = mapOf(
         "Cobre" to 0, "Bronze" to 500, "Plata" to 1000, "Oro" to 1500,
@@ -68,7 +67,7 @@ class RankingFragment : Fragment() {
             else -> R.drawable.place_holder
         }
     }
-    // ---------------------------------------------
+
 
 
     override fun onCreateView(

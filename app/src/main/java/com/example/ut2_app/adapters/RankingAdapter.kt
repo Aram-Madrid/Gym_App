@@ -17,7 +17,6 @@ import com.example.ut2_app.model.UsuarioRankingDB
 class RankingAdapter(
     private val context: Context,
     private var usuarios: List<UsuarioRankingDB>,
-    // 🔑 NUEVO: Callback para el click
     private val onUserClick: (String) -> Unit
 ) : RecyclerView.Adapter<RankingAdapter.UsuarioViewHolder>() {
 

@@ -73,10 +73,23 @@ class HomeViewModel : ViewModel() {
                 _usuarioActual.value = usuario
 
                 // 2. RANKING
-                val todosUsuarios = postgrestClient["usuarios"]
-                    .select(list("id, elo")) { order("elo", Order.DESCENDING) }
+                val amigosResponse = postgrestClient["amigos"]
+                    .select { filter { eq("id", currentUserId) } }
+                    .decodeList<Map<String, String>>()
+
+                val friendIds = amigosResponse.mapNotNull { it["id_amigo"] }.toMutableList()
+                friendIds.add(currentUserId) // CRÍTICO: Incluir al usuario actual
+
+                // 2b. Obtener SOLO la lista de usuarios (Amigos + Tú) ORDENADOS por ELO
+                val rankingAmigos = postgrestClient["usuarios"]
+                    .select(list("id, elo")) {
+                        filter { isIn("id", friendIds) } // Filtra por la lista de IDs
+                        order("elo", Order.DESCENDING) // Ordenar por ELO
+                    }
                     .decodeList<UsuarioEloSimple>()
-                val posicion = todosUsuarios.indexOfFirst { it.id == currentUserId } + 1
+
+                // 2c. Calcular la posición (índice + 1) en la lista filtrada
+                val posicion = rankingAmigos.indexOfFirst { it.id == currentUserId } + 1
                 _posicionRanking.value = if (posicion > 0) posicion else null
 
                 // 3. PUNTOS GRUPO (Con normalización)
@@ -88,7 +101,6 @@ class HomeViewModel : ViewModel() {
                         .decodeList<PuntosAcumulados>()
 
                     if (resultados.isNotEmpty()) {
-                        // 🔑 MEJORA: Normalizamos nombres (Trim + Capitalize) y sumamos duplicados
                         val gruposNormalizados = resultados.groupBy {
                             it.grupo.trim().replaceFirstChar { c -> c.uppercase() }
                         }.map { (nombre, lista) ->
@@ -126,7 +138,6 @@ class HomeViewModel : ViewModel() {
     private fun completarGruposMusculares(lista: List<PuntosGrupoUI>): List<PuntosGrupoUI> {
         val gruposPrincipales = listOf("Pecho", "Espalda", "Piernas", "Hombros", "Brazos")
 
-        // 🔑 PROTECCIÓN: distinctBy para evitar etiquetas duplicadas visualmente
         val listaUnica = lista.distinctBy { it.grupo }
         val gruposExistentes = listaUnica.map { it.grupo }.toSet()
 

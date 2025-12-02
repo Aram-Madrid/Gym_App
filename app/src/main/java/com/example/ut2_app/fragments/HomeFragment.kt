@@ -122,6 +122,7 @@ class HomeFragment : Fragment() {
 }
 
 // COMPOSABLES - Gráfico de Radar
+
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 fun GraficoRadar(viewModel: HomeViewModel) {
