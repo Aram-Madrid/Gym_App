@@ -4,15 +4,20 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
 @Serializable
-data class UsuarioRankingDB( // Usaremos este nombre para la decodificación de la BD
+data class UsuarioRankingDB(
     val id: String, // UUID
     val nombre: String,
+
     @SerialName("elo")
     val elo: Short, // Mapea smallint
+
+    @SerialName("rango")
+    val rango: String? = "Cobre",
+
     @SerialName("fotoperfilurl")
     val fotoUrl: String? = null,
 
-    // Propiedades que el Adapter necesita (pero no vienen directamente de la BD)
+    // Propiedades de UI (no vienen de BD)
     val esActual: Boolean = false,
     var posicion: Int = 0
 )

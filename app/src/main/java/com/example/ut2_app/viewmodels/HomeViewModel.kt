@@ -1,23 +1,33 @@
 package com.example.ut2_app.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ut2_app.model.Maximos
 import com.example.ut2_app.model.PuntosAcumulados
 import com.example.ut2_app.model.PuntosGrupoUI
 import com.example.ut2_app.util.AuthManager
 import com.example.ut2_app.util.SupabaseClientProvider
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Columns.Companion.list
+import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import android.util.Log
-import io.github.jan.supabase.postgrest.query.Columns.Companion.list
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 class HomeViewModel : ViewModel() {
 
     private val _puntosRendimiento = MutableStateFlow<List<PuntosGrupoUI>>(emptyList())
     val puntosRendimiento: StateFlow<List<PuntosGrupoUI>> = _puntosRendimiento.asStateFlow()
+
+    private val _usuarioActual = MutableStateFlow<UsuarioHome?>(null)
+    val usuarioActual: StateFlow<UsuarioHome?> = _usuarioActual.asStateFlow()
+
+    private val _posicionRanking = MutableStateFlow<Int?>(null)
+    val posicionRanking: StateFlow<Int?> = _posicionRanking.asStateFlow()
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -25,9 +35,19 @@ class HomeViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
-    init {
-        cargarPuntos()
+    companion object {
+        val LIMITES_GRUPO_MUSCULAR = mapOf(
+            "Pecho" to 5000.0,
+            "Espalda" to 5000.0,
+            "Piernas" to 6000.0,
+            "Hombros" to 4000.0,
+            "Brazos" to 3500.0,
+            "Core" to 3000.0
+        )
     }
+
+    // Inicializamos cargando datos si quieres, o esperas al fragmento
+    // init { cargarPuntos() }
 
     private fun cargarPuntos() {
         viewModelScope.launch {
@@ -35,58 +55,116 @@ class HomeViewModel : ViewModel() {
             _error.value = null
 
             try {
-                // 🔑 MEJORA: Obtener ID del usuario dinámicamente
                 val currentUserId = AuthManager.getCurrentUserId()
 
                 if (currentUserId == null) {
-                    Log.w("HomeViewModel", "No hay usuario autenticado")
-                    _error.value = "No hay sesión activa"
-                    _puntosRendimiento.value = emptyList()
+                    _puntosRendimiento.value = crearGruposVacios()
+                    _usuarioActual.value = null
+                    _isLoading.value = false
                     return@launch
                 }
 
                 val postgrestClient = SupabaseClientProvider.supabase.postgrest
-                val joinColumns = "grupo, puntos_acumulados, grupo_muscular_max(puntos_max)"
 
-                val resultados = postgrestClient["usuario_puntos_grupo"]
-                    .select(list(joinColumns)) {
-                        filter {
-                            eq("id_usuario", currentUserId)
+                // 1. CARGAR USUARIO
+                val usuario = postgrestClient["usuarios"]
+                    .select { filter { eq("id", currentUserId) } }
+                    .decodeSingleOrNull<UsuarioHome>()
+                _usuarioActual.value = usuario
+
+                // 2. RANKING
+                val todosUsuarios = postgrestClient["usuarios"]
+                    .select(list("id, elo")) { order("elo", Order.DESCENDING) }
+                    .decodeList<UsuarioEloSimple>()
+                val posicion = todosUsuarios.indexOfFirst { it.id == currentUserId } + 1
+                _posicionRanking.value = if (posicion > 0) posicion else null
+
+                // 3. PUNTOS GRUPO (Con normalización)
+                try {
+                    val resultados = postgrestClient["usuario_puntos_grupo"]
+                        .select(list("grupo, puntos_acumulados, grupo_muscular_max(puntos_max)")) {
+                            filter { eq("id_usuario", currentUserId) }
                         }
+                        .decodeList<PuntosAcumulados>()
+
+                    if (resultados.isNotEmpty()) {
+                        // 🔑 MEJORA: Normalizamos nombres (Trim + Capitalize) y sumamos duplicados
+                        val gruposNormalizados = resultados.groupBy {
+                            it.grupo.trim().replaceFirstChar { c -> c.uppercase() }
+                        }.map { (nombre, lista) ->
+                            PuntosGrupoUI(
+                                grupo = nombre,
+                                valor = lista.sumOf { it.puntosAcumulados }, // Sumar si hay duplicados
+                                maximo = lista.first().grupoMuscularMax.puntosMax
+                            )
+                        }
+
+                        _puntosRendimiento.value = completarGruposMusculares(gruposNormalizados)
+                    } else {
+                        _puntosRendimiento.value = crearGruposVacios()
                     }
-                    .decodeList<PuntosAcumulados>()
 
-                if (resultados.isEmpty()) {
-                    Log.d("HomeViewModel", "No hay datos de rendimiento para el usuario")
-                    _puntosRendimiento.value = emptyList()
-                    return@launch
+                } catch (e: Exception) {
+                    Log.e("HomeVM", "Error puntos: ${e.message}")
+                    _puntosRendimiento.value = crearGruposVacios()
                 }
-
-                val listaMapeada = resultados.map { item ->
-                    PuntosGrupoUI(
-                        grupo = item.grupo,
-                        valor = item.puntosAcumulados,
-                        maximo = item.grupoMuscularMax.puntosMax
-                    )
-                }
-
-                _puntosRendimiento.value = listaMapeada
-                Log.d("HomeViewModel", "Datos cargados: ${listaMapeada.size} grupos musculares")
 
             } catch (e: Exception) {
-                Log.e("HomeViewModel", "Error al cargar puntos de rendimiento: ${e.message}", e)
-                _error.value = "Error al cargar datos: ${e.localizedMessage}"
-                _puntosRendimiento.value = emptyList()
+                _error.value = "Error: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    /**
-     * Permite recargar los datos manualmente (por ejemplo, después de completar ejercicios)
-     */
+    private fun crearGruposVacios(): List<PuntosGrupoUI> {
+        return LIMITES_GRUPO_MUSCULAR.map { (nombre, max) ->
+            PuntosGrupoUI(nombre, 0.0, max)
+        }.sortedBy { listOf("Pecho", "Espalda", "Piernas", "Hombros", "Brazos", "Core").indexOf(it.grupo) }
+    }
+
+    private fun completarGruposMusculares(lista: List<PuntosGrupoUI>): List<PuntosGrupoUI> {
+        val gruposPrincipales = listOf("Pecho", "Espalda", "Piernas", "Hombros", "Brazos")
+
+        // 🔑 PROTECCIÓN: distinctBy para evitar etiquetas duplicadas visualmente
+        val listaUnica = lista.distinctBy { it.grupo }
+        val gruposExistentes = listaUnica.map { it.grupo }.toSet()
+
+        val listaCompleta = listaUnica.toMutableList()
+
+        gruposPrincipales.forEach { grupo ->
+            if (grupo !in gruposExistentes) {
+                listaCompleta.add(
+                    PuntosGrupoUI(
+                        grupo = grupo,
+                        valor = 0.0,
+                        maximo = LIMITES_GRUPO_MUSCULAR[grupo] ?: 5000.0
+                    )
+                )
+            }
+        }
+
+        // Orden fijo para que el gráfico no "baile"
+        return listaCompleta.sortedBy { gruposPrincipales.indexOf(it.grupo) }
+    }
+
     fun recargarPuntos() {
         cargarPuntos()
     }
 }
+
+// DTOs (Se mantienen)
+@Serializable
+data class UsuarioHome(
+    val id: String,
+    val nombre: String,
+    val email: String? = null,
+    val altura: Int? = null,
+    val peso: Int? = null,
+    val elo: Int? = 0,
+    val rango: String? = "Bronze",
+    @SerialName("fotoperfilurl") val fotoPerfilUrl: String? = null
+)
+
+@Serializable
+data class UsuarioEloSimple(val id: String, val elo: Int? = null)
