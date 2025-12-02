@@ -11,8 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
-import coil.load // Usaremos COIL para cargar la foto de perfil (si no usas Coil, reemplázalo por Glide/Picasso)
-import com.example.ut2_app.R
+import coil.load
 import com.example.ut2_app.databinding.ActivityConfiguracionBinding
 import com.example.ut2_app.util.SupabaseClientProvider
 import io.github.jan.supabase.auth.auth
@@ -48,7 +47,7 @@ class ConfiguracionActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupGalleryLauncher()
-        cargarDatosIniciales() // NUEVA LLAMADA PARA CARGAR NOMBRE Y FOTO
+        cargarDatosIniciales() //CARGAR NOMBRE Y FOTO
 
         // --- Lógica del Switch de Tema ---
         val sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE)
@@ -84,17 +83,15 @@ class ConfiguracionActivity : AppCompatActivity() {
             }
             modoOscuro = !modoOscuro
         }
-        // ----------------------------------
 
-        // Click en botón confirmar (Añadimos lógica de cambio de nombre)
         binding.btnConfirmar.setOnClickListener {
             val nuevoNombre = binding.editTextNombre.text.toString().trim()
             actualizarPerfilYTema(nuevoNombre) // LÓGICA DE ACTUALIZACIÓN COMBINADA
         }
 
-        // CERRAR SESIÓN (Sin cambios)
+        // CERRAR SESIÓN
         binding.btnCerrarSesion.setOnClickListener {
-            // ... (código para cerrar sesión)
+            //para cerrar sesión
             lifecycleScope.launch {
                 try {
                     supabase.auth.signOut()
@@ -109,13 +106,12 @@ class ConfiguracionActivity : AppCompatActivity() {
             }
         }
 
-        // SUBIR FOTO DE PERFIL (Sin cambios)
+        // SUBIR FOTO DE PERFIL
         binding.imgFotoPerfil.setOnClickListener {
             galleryLauncher.launch("image/*")
         }
     }
 
-    // --- NUEVAS FUNCIONES Y MODIFICACIONES ---
 
     private fun cargarDatosIniciales() {
         val userId = supabase.auth.currentUserOrNull()?.id ?: return
@@ -129,7 +125,7 @@ class ConfiguracionActivity : AppCompatActivity() {
                 // Cargar Nombre
                 binding.editTextNombre.setText(profile.nombre)
 
-                // Cargar Foto (Usando Coil para evitar problemas de caché, similar al RankingAdapter)
+                // Cargar Foto (Coil)
                 if (!profile.fotoperfilurl.isNullOrEmpty()) {
                     val url = profile.fotoperfilurl
                     val cacheBustingUrl = "$url?v=${System.currentTimeMillis()}"
@@ -156,7 +152,7 @@ class ConfiguracionActivity : AppCompatActivity() {
         lifecycleScope.launch {
             var nombreActualizado = false
 
-            // Lógica de Actualización de Nombre
+            //Actualización de Nombre
             if (nuevoNombre.isNotEmpty()) {
                 try {
                     supabase.postgrest["usuarios"]
@@ -170,7 +166,7 @@ class ConfiguracionActivity : AppCompatActivity() {
                 }
             }
 
-            // Lógica de Actualización de Tema
+            //Actualización de Tema
             sharedPref.edit().putBoolean("modoOscuro", modoOscuro).apply()
 
             if (modoOscuro) {
@@ -185,13 +181,12 @@ class ConfiguracionActivity : AppCompatActivity() {
                 Toast.makeText(this@ConfiguracionActivity, "Tema actualizado.", Toast.LENGTH_SHORT).show()
             }
 
-            // Navegar de vuelta
+            //de vuelta
             startActivity(Intent(this@ConfiguracionActivity, MainActivity::class.java)) // ASUMIENDO MainActivity
             finish()
         }
     }
 
-    // --- MÉTODOS DE SUBIDA DE FOTO ---
 
     private fun setupGalleryLauncher() {
         // ... (código existente)

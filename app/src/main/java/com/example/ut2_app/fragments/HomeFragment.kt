@@ -121,9 +121,7 @@ class HomeFragment : Fragment() {
     }
 }
 
-// ═══════════════════════════════════════════════════════════
 // COMPOSABLES - Gráfico de Radar
-// ═══════════════════════════════════════════════════════════
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable

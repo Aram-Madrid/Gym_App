@@ -10,7 +10,6 @@ import com.example.ut2_app.util.SupabaseClientProvider
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.postgrest.postgrest
-// 🔑 IMPORTACIONES CLAVE
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.coroutines.launch
@@ -49,7 +48,6 @@ class CrearCuentaActivity : AppCompatActivity() {
     ) {
         lifecycleScope.launch {
             try {
-                // 1. Crear usuario en Auth (Sistema de seguridad)
                 supabase.auth.signUpWith(Email) {
                     this.email = email
                     this.password = password
@@ -58,8 +56,6 @@ class CrearCuentaActivity : AppCompatActivity() {
                 val authUser = supabase.auth.currentUserOrNull()
 
                 if (authUser != null) {
-                    // 2. Construir JSON seguro para insertar en tabla pública 'usuarios'
-                    // Esto evita el error de serialización y conflicto de datos
                     val usuarioJson = buildJsonObject {
                         put("id", authUser.id)
                         put("nombre", nombre)
@@ -67,24 +63,16 @@ class CrearCuentaActivity : AppCompatActivity() {
                         // Datos opcionales
                         if (alturaStr.isNotEmpty()) put("altura", alturaStr.toInt())
                         if (pesoStr.isNotEmpty()) put("peso", pesoStr.toInt())
-
-                        // 🔑 VALORES INICIALES HARDCORE (Desde Cero)
                         put("elo", 0)
                         put("rango", "Cobre")
                         put("ultimo_puntaje", 0)
                     }
 
-                    // 3. Insertar en tabla usuarios
+                    //Inserta en tabla usuarios
                     supabase.postgrest["usuarios"].insert(usuarioJson)
-
-                    // 4. Inicializar sus puntos de grupo muscular a 0 (Para el gráfico)
-                    // Llamamos al trigger que ya tienes o insertamos manualmente si fallara
-                    // (El trigger 'inicializar_puntos_grupo' que tienes debería encargarse,
-                    // pero por seguridad el insert del usuario es lo principal).
 
                     Toast.makeText(this@CrearCuentaActivity, "Cuenta creada. ¡Bienvenido!", Toast.LENGTH_SHORT).show()
 
-                    // Ir a la App
                     startActivity(Intent(this@CrearCuentaActivity, MainActivity::class.java))
                     finish()
 
@@ -93,7 +81,7 @@ class CrearCuentaActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
-                // Manejo de error si el usuario ya existe o falla la red
+                // Manejo de error
                 Toast.makeText(this@CrearCuentaActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }

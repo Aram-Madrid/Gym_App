@@ -2,38 +2,31 @@ package com.example.ut2_app.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ut2_app.adapters.EjercicioAdapter
 import com.example.ut2_app.databinding.ActivityEjercicioBinding
-import com.example.ut2_app.model.Ejercicio
 import com.example.ut2_app.viewmodels.EjercicioViewModel
 import com.example.ut2_app.viewmodels.EjercicioViewModelFactory
-import kotlinx.coroutines.launch
 
 class EjercicioActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityEjercicioBinding
     private lateinit var adapter: EjercicioAdapter
 
-    // 🔑 CORRECCIÓN 1: Obtener el ID como String? (puede ser null)
     private val idDiaRutina: String?
         get() = intent.getStringExtra("id_dia")
 
     private val nombreDia: String?
         get() = intent.getStringExtra("nombre_dia")
 
-    // 🔑 CORRECCIÓN 2: Pasar null como null, NO como string "null"
     private val viewModel: EjercicioViewModel by viewModels {
         EjercicioViewModelFactory(idDiaRutina) // ✅ Pasamos el valor real (null o String)
     }
 
-    // Launcher para el resultado de DetalleEjercicioActivity
     private val detalleEjercicioLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
@@ -61,7 +54,6 @@ class EjercicioActivity : AppCompatActivity() {
         binding.recyclerViewEjercicios.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewEjercicios.adapter = adapter
 
-        // Observar ejercicios
         observeEjercicios()
 
         // Botón para agregar nuevo ejercicio
@@ -78,12 +70,6 @@ class EjercicioActivity : AppCompatActivity() {
     private fun observeEjercicios() {
         viewModel.listaEjercicios.observe(this) { nuevaLista ->
             adapter.actualizarLista(nuevaLista)
-
-            // Mostrar mensaje si la lista está vacía
-            if (nuevaLista.isEmpty()) {
-                // Puedes mostrar un TextView con "No hay ejercicios aún"
-                // o simplemente dejar el RecyclerView vacío
-            }
         }
     }
 

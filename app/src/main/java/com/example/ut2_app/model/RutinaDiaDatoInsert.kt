@@ -27,7 +27,6 @@ data class RutinaDiaDatoInsert(
     @SerialName("dificultad")
     val dificultad: Double,
 
-    // 🔑 NUEVOS CAMPOS: PTM y ELO
     @SerialName("ptm")
     val ptm: Double,
 

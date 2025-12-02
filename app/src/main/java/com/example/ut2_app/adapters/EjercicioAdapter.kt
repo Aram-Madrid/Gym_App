@@ -21,9 +21,7 @@ class EjercicioAdapter(
             // Mostrar nombre del ejercicio
             binding.textViewNombreEjercicio.text = ejercicio.nombre
 
-            // 🔑 FORMATO SOLICITADO: Mostrar series individuales
             if (ejercicio.series.isNotEmpty()) {
-                // Formato: "2 series de 20 reps y 10 kg la primera y 10 reps 10 kg la segunda"
                 val resumen = buildString {
                     append("${ejercicio.series.size} ")
                     append(if (ejercicio.series.size == 1) "serie" else "series")

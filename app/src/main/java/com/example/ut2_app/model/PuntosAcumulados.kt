@@ -8,7 +8,6 @@ data class PuntosAcumulados(
     @SerialName("grupo")
     val grupo: String,
 
-    // 🔑 CORRECCIÓN: Cambiar Float a Double para manejar el tipo 'numeric'
     @SerialName("puntos_acumulados")
     val puntosAcumulados: Double,
 

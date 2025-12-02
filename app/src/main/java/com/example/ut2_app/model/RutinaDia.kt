@@ -17,7 +17,7 @@ data class RutinaDia(
     @SerialName("puntos_total")
     val puntosTotal: Double? = 0.0,
 
-    // 🔑 NUEVO CAMPO: Fecha de creación para agrupar por semanas
+    //Fecha de creación para agrupar por semanas
     @SerialName("created_at")
     val fecha: String? = null
 )

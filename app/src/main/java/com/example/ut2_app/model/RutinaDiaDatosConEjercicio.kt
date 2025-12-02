@@ -16,7 +16,6 @@ data class RutinaDiaDatosConEjercicio(
     @SerialName("id_dato")
     val id_dato: String,
 
-    // 🔑 CORRECCIÓN: La columna se llama 'routine_day_id', no 'id_dia'
     @SerialName("routine_day_id")
     val routine_day_id: String,
 

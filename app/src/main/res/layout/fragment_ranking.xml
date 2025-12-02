@@ -18,6 +18,33 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageView
+        android:id="@+id/emblemaRanking"
+        android:layout_width="275dp"
+        android:layout_height="183dp"
+        android:layout_marginTop="@dimen/margin_medium"
+        android:scaleType="fitCenter"
+        android:src="@drawable/place_holder"
+        android:contentDescription="Emblema de rango del usuario actual"
+        app:layout_constraintTop_toBottomOf="@+id/tvTituloRanking"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/barraExperiencia"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="250dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="@dimen/margin_small"
+        android:layout_marginBottom="@dimen/margin_medium"
+        android:max="100"
+        android:progress="0"
+        android:progressDrawable="@drawable/progress_bar_ranking"
+        app:layout_constraintTop_toBottomOf="@+id/emblemaRanking"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerRanking"
         android:layout_width="0dp"
@@ -28,7 +55,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvTituloRanking"
+        app:layout_constraintTop_toBottomOf="@+id/barraExperiencia"
         tools:listitem="@layout/item_ranking" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

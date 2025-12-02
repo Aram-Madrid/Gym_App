@@ -1,7 +1,5 @@
 package com.example.ut2_app.util
 
-import kotlin.math.pow
-
 object PTMCalculator {
 
     fun calcularPTM(peso: Double, reps: Int, dificultad: Double = 1.0): Double {
@@ -20,7 +18,6 @@ object PTMCalculator {
     }
 
     /**
-     * 🔑 FUNCIÓN RESTAURADA (COMPATIBILIDAD)
      * Se usa en EjercicioViewModel. Asume que no hay historial (ptmAnterior = 0.0).
      */
     fun calcularCambioELO(ptm: Double, eloActual: Int): Int {
