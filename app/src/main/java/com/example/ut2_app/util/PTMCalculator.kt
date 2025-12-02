@@ -1,7 +1,5 @@
 package com.example.ut2_app.util
 
-import kotlin.math.pow
-
 object PTMCalculator {
 
     fun calcularPTM(peso: Double, reps: Int, dificultad: Double = 1.0): Double {

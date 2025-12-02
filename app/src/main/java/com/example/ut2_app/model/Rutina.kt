@@ -18,8 +18,7 @@ data class Rutina(
     @SerialName("nombre_rutina")
     val nombreRutina: String?,
 
-    // 🔑 Campo Anidado: Contiene la lista de días asociados a esta rutina,
-    // que vienen de la tabla 'rutina_dia'.
+
     @SerialName("rutina_dia")
     val rutinaDias: List<RutinaDia> = emptyList()
 )
