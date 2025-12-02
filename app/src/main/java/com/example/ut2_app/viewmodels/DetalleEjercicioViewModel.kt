@@ -14,6 +14,9 @@ import com.example.ut2_app.util.PTMCalculator
 import com.example.ut2_app.util.SupabaseClientProvider
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns.Companion.list
+// 🔑 IMPORTANTE: Nuevas importaciones para solucionar el error de serialización
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -208,16 +211,19 @@ class DetalleEjercicioViewModel : ViewModel() {
                 Log.d("DetalleEjercicioVM", "✅ ${seriesData.size} series guardadas")
 
                 // ═══════════════════════════════════════════════════════════
-                // 3. ACTUALIZAR ELO DEL USUARIO (RANKING)
+                // 3. ACTUALIZAR ELO DEL USUARIO (RANKING) - CORREGIDO
                 // ═══════════════════════════════════════════════════════════
                 val nuevoRango = PTMCalculator.obtenerRango(nuevoELO)
 
+                // 🔑 CORRECCIÓN: Usar buildJsonObject en lugar de mapOf para evitar errores de serialización "Any"
+                val updateData = buildJsonObject {
+                    put("elo", nuevoELO)
+                    put("rango", nuevoRango)
+                    put("ultimo_puntaje", ptm)
+                }
+
                 postgrestClient["usuarios"]
-                    .update(mapOf(
-                        "elo" to nuevoELO,
-                        "rango" to nuevoRango,
-                        "ultimo_puntaje" to ptm
-                    )) {
+                    .update(updateData) {
                         filter { eq("id", currentUserId) }
                     }
                 Log.d("DetalleEjercicioVM", "✅ ELO actualizado: $nuevoELO ($nuevoRango)")
@@ -297,8 +303,13 @@ class DetalleEjercicioViewModel : ViewModel() {
                 // Actualizar: sumar puntos
                 val nuevoTotal = registroExistente.puntosAcumulados + puntosNuevos
 
+                // 🔑 CORRECCIÓN: Usar buildJsonObject también aquí para seguridad
+                val updateData = buildJsonObject {
+                    put("puntos_acumulados", nuevoTotal)
+                }
+
                 postgrestClient["usuario_puntos_grupo"]
-                    .update(mapOf("puntos_acumulados" to nuevoTotal)) {
+                    .update(updateData) {
                         filter {
                             eq("id_usuario", userId)
                             eq("grupo", grupoMuscular)
